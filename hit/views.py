@@ -27,6 +27,7 @@ def index(request):
     template= loader.get_template('hit/client.html')
     response = template.render(render_data, request)
     # without this header, your iFrame will not render in Amazon
+    # response['x-frame-options'] = 'this_can_be_anything'
 
-    return HttpResponse(response, content_type='application/xhtml+xml')
+    return HttpResponse(response)
 
