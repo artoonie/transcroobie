@@ -1,0 +1,23 @@
+<html>
+    <head>
+    </head>
+    <body>
+    <h3>Using your own words, describe this man however you want.</h3>
+        <form action="{{ amazon_host }}" method="POST">
+            <textarea rows="4" cols="50" name="user-input"> </textarea>
+            <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
+            <br/>
+            <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
+            <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
+            <input type="submit"/>
+        </form>
+        <div>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome1.jpg" style="width: 30%;"/>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome2.jpg" style="width: 30%;"/>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome3.jpg" style="width: 30%;"/>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome4.jpg" style="width: 30%;"/>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome5.jpg" style="width: 30%;"/>
+            <img src="https://s3.amazonaws.com/lobbdawg/mturk/broome6.jpg" style="width: 30%;"/>
+        </div>
+    </body>
+</html>
