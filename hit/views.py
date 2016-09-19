@@ -15,8 +15,6 @@ def index(request):
         # worked accepted the task
         pass
 
-    worker_id = request.GET.get("workerId", "")
-
     render_data = {
         "worker_id": request.GET.get("workerId", ""),
         "assignment_id": request.GET.get("assignmentId", ""),
