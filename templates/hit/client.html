@@ -1,12 +1,20 @@
-    <h3>Using your own words, describe this man however you want.</h3>
-    <form action="{{ amazon_host }}" method="POST">
-        <textarea rows="4" cols="50" name="user-input"> </textarea>
-        <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
-        <br/>
-        <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
-        <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
-        <input type="submit"/>
-    </form>
-    <div>
-        <img src="http://arminsamii.com/images/armin.png" width="500"/>
-    </div>
+{% load static %}
+
+<h3>Transcribe the audio below.</h3>
+<h4>Don't worry about words cut off at the beginning or end.</h4>
+
+<audio controls>
+  <source src="{% static "tracks/track01.mp3" %}" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+
+<form action="{{ amazon_host }}" method="POST">
+    <textarea rows="4" cols="50" name="user-input"> </textarea>
+    <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
+    <br/>
+    <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
+    <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
+    <input type="submit"/>
+</form>
+<div>
+</div>
