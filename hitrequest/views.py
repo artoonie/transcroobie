@@ -20,13 +20,12 @@ def list(request):
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             hitCreator = HitCreator()
-            newdoc = Document(docfile = request.FILES['docfile'])
+            localFilename = request.FILES['docfile']
+            newdoc = Document(docfile = localFilename)
             newdoc.save()
-            # Get the fullpath of the uploaded file
-            fullpath = os.path.join(settings.MEDIA_ROOT, newdoc.docfile.name)
 
             # Get the paths of each of the split fileparts
-            for tmpFileObject in splitAudioIntoParts(fullpath,
+            for tmpFileObject in splitAudioIntoParts(localFilename.temporary_file_path(),
                     basedir = settings.MEDIA_ROOT):
                 relPath = os.path.relpath(tmpFileObject, settings.MEDIA_ROOT)
 
