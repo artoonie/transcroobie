@@ -12,7 +12,13 @@
     {% if documents %}
         <ul>
         {% for document in documents %}
-            <li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+            <li>
+            <form action="{% url 'delete' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="docfile" value="{{ document.pk }}" />
+                <input type="submit" value="[x]" />
+                <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+            </form>
         {% endfor %}
         </ul>
     {% else %}
@@ -29,6 +35,11 @@
                 {{ form.docfile }}
             </p>
             <p><input type="submit" value="Upload" /></p>
+        </form>
+
+        <form action="{% url 'deleteAll' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="submit" value="Delete all files" />
         </form>
     </body>
 </html> 
