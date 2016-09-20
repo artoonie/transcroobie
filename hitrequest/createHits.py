@@ -8,7 +8,7 @@ class HitCreator():
         AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
         AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
-        if os.environ.get("I_AM_IN_DEV_ENV"):
+        if os.environ.get("I_AM_IN_DEV_ENV") or os.environ.get("USE_AMT_SANDBOX"):
             HOST = 'mechanicalturk.sandbox.amazonaws.com'
         else:
             HOST = 'mechanicalturk.amazonaws.com'
