@@ -32,3 +32,4 @@ def splitAudioIntoParts(uploadedFilename, basedir):
                 dir = basedir) as currFilename:
             curr_track.export(currFilename.name, format="mp3")
             yield currFilename.name
+            return

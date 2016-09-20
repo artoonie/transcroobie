@@ -12,12 +12,14 @@ from django.shortcuts import get_object_or_404
 from hitrequest.models import Document
 from hitrequest.forms import DocumentForm
 from hitrequest.splitAudio import splitAudioIntoParts
+from hitrequest.createHits import HitCreator
 
 def list(request):
     # Handle file upload
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
+            hitCreator = HitCreator()
             newdoc = Document(docfile = request.FILES['docfile'])
             newdoc.save()
             # Get the fullpath of the uploaded file
@@ -35,6 +37,9 @@ def list(request):
                     fileCopy = File(file=fileObj, name=relPath)
                     currdoc = Document(docfile = fileCopy)
                     currdoc.save()
+
+                    # Create a hit from this document
+                    hitCreator.createHitFromDocument(currdoc)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))

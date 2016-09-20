@@ -1,6 +1,8 @@
 import os
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.template import loader
+from hitrequest.models import Document
 
 if os.environ.get("I_AM_IN_DEV_ENV"):
     AMAZON_HOST = "https://workersandbox.mturk.com/mturk/externalSubmit"
@@ -15,11 +17,15 @@ def index(request):
         # worked accepted the task
         pass
 
+    fileId = request.GET.get("docId", "")
+    audioDocument = get_object_or_404(Document, pk = fileId)
+
     render_data = {
         "worker_id": request.GET.get("workerId", ""),
         "assignment_id": request.GET.get("assignmentId", ""),
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
+        "document": audioDocument,
     }
 
     template= loader.get_template('hit/client.html')

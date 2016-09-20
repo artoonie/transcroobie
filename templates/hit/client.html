@@ -1,10 +1,8 @@
-{% load static %}
-
 <h3>Transcribe the audio below.</h3>
 <h4>Don't worry about words cut off at the beginning or end.</h4>
 
 <audio controls>
-  <source src="{% static "tracks/track01.mp3" %}" type="audio/mpeg">
+  <source src="{{ document.docfile.url }}" type="audio/mpeg">
 Your browser does not support the audio element.
 </audio>
 
