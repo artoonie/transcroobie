@@ -34,5 +34,5 @@ setup(
         ],
     },
     scripts=[ ],
-    install_requires=['django', 'gunicorn', 'whitenoise']
+    install_requires=['django', 'gunicorn', 'whitenoise', 'pydub']
 )
