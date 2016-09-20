@@ -15,6 +15,13 @@ from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
 
 def list(request):
+    import boto
+    s3 = boto.connect_s3(os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
+    bucket = s3.lookup(os.environ['AWS_STORAGE_BUCKET_NAME'])
+    key = bucket.new_key('can-heroku-connect')
+    key.set_contents_from_string('is anyone out there?')
+    key.exists()
+    key.delete()
     # Handle file upload
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
