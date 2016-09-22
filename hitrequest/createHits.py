@@ -20,8 +20,6 @@ class HitCreator():
             baseurl = 'https://localhost:5000/hit/'
         else:
             baseurl = "https://transcroobie.herokuapp.com/hit/"
-        import os
-        print "BASE URL IS ", baseurl, "SETTINGS IS", settings.IS_DEV_ENV, "OS ENV IS", os.environ
         title = "Transcribe the audio as best you can."
         description = "Transcribe the audio. Words may be cut off at the beginning"\
                       " or end of the segment. Do not worry about correctly"\
