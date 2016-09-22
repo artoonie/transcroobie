@@ -11,6 +11,7 @@ def basenameNoExt(filename):
 def splitAudioIntoParts(uploadedFilename, basedir):
     """ Yields the filename of a namedTemporaryFile,
         which is deleted at the next iteration. """
+    assert os.path.exists(uploadedFilename)
     track = AudioSegment.from_mp3(uploadedFilename)
     tracklen = len(track)
     ten_seconds = 10*1000
