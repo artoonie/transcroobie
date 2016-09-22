@@ -1,10 +1,10 @@
-import os
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from hitrequest.models import Document
+from transcroobie import settings
 
-if bool(os.environ.get("I_AM_IN_DEV_ENV")):
+if settings.IS_DEV_ENV:
     AMAZON_HOST = "https://workersandbox.mturk.com/mturk/externalSubmit"
 else:
     AMAZON_HOST = "https://www.mturk.com/mturk/externalSubmit"
