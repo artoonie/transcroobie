@@ -1,14 +1,17 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
+from django.views.decorators.clickjacking import xframe_options_exempt
 from hitrequest.models import Document
 from transcroobie import settings
+
 
 if settings.IS_DEV_ENV:
     AMAZON_HOST = "https://workersandbox.mturk.com/mturk/externalSubmit"
 else:
     AMAZON_HOST = "https://www.mturk.com/mturk/externalSubmit"
 
+@xframe_options_exempt
 def index(request):
     if request.GET.get("assignmentId") == "ASSIGNMENT_ID_NOT_AVAILABLE":
         # worker hasn't accepted the HIT (task) yet
@@ -26,7 +29,6 @@ def index(request):
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
         "document": audioDocument,
-        "x-frame-options": "any-text-enables-iframe-support"
     }
 
     template= loader.get_template('hit/client.html')
