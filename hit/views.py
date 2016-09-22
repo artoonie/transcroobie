@@ -13,12 +13,10 @@ else:
 
 @xframe_options_exempt
 def index(request):
+    disabledText = "" # To be placed at the end of the submit <input> tag
     if request.GET.get("assignmentId") == "ASSIGNMENT_ID_NOT_AVAILABLE":
         # worker hasn't accepted the HIT (task) yet
-        pass
-    else:
-        # worked accepted the task
-        pass
+        disabledText = "disabled"
 
     fileId = request.GET.get("docId", "")
     audioDocument = get_object_or_404(Document, pk = fileId)
@@ -29,12 +27,11 @@ def index(request):
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
         "document": audioDocument,
+        "disabled": disabledText
     }
 
     template= loader.get_template('hit/client.html')
     response = template.render(render_data, request)
-    # without this header, your iFrame will not render in Amazon
-    # response['x-frame-options'] = 'this_can_be_anything'
 
     return HttpResponse(response)
 

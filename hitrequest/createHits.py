@@ -45,11 +45,11 @@ class HitCreator():
     def deleteAllHits(self):
         allHits = [hit for hit in self.connection.get_all_hits()]
         for hit in allHits:
-            print "Expiring hit ", hit
-            self.connection.expire_hit(hit)
+            print "Disabling hit ", hit.HITId
+            self.connection.disable_hit(hit.HITId)
 
         # Approve hits:
-        # for hit in all_hits:
+        # for hit in allHits:
         #     assignments = self.connection.get_assignments(hit.HITId)
         #     for assignment in assignments:
         #         # don't ask me why this is a 2D list
