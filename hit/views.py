@@ -26,6 +26,7 @@ def index(request):
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
         "document": audioDocument,
+        "x-frame-options": "any-text-enables-iframe-support"
     }
 
     template= loader.get_template('hit/client.html')
