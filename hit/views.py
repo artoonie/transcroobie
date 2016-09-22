@@ -27,7 +27,7 @@ def index(request):
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
         "document": audioDocument,
-        "disabled": disabledText
+        "isDisabled": disabledText
     }
 
     template= loader.get_template('hit/client.html')
