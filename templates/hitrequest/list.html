@@ -41,6 +41,11 @@
             {% csrf_token %}
             <input type="submit" value="Delete all files" />
         </form>
+
+        <form action="{% url 'deleteAllHits' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="submit" value="Delete all AMT HITs" />
+        </form>
     </body>
 </html> 
 

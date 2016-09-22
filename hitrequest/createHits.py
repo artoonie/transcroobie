@@ -41,3 +41,22 @@ class HitCreator():
             response_groups=('Minimal', 'HITDetail'),  # I don't know what response groups are
         )
         print "Created hit", create_hit_result
+
+    def deleteAllHits(self):
+        allHits = [hit for hit in self.connection.get_all_hits()]
+        for hit in allHits:
+            self.connection.expire_hit(hit)
+
+        # Approve hits:
+        # for hit in all_hits:
+        #     assignments = self.connection.get_assignments(hit.HITId)
+        #     for assignment in assignments:
+        #         # don't ask me why this is a 2D list
+        #         question_form_answers = assignment.answers[0]
+        #         for question_form_answer in question_form_answers:
+        #             # "user-input" is the field I created and the only one I care about
+        #             if question_form_answer.qid == "user-input":
+        #                 user_response = question_form_answer.fields[0]
+        #                 print user_response
+        #                 print "\n"
+        #         self.connection.approve_assignment(assignment.AssignmentId)

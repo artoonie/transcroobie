@@ -77,3 +77,9 @@ def deleteAll(request):
         _deleteDocument(docToDel)
 
     return HttpResponseRedirect(reverse('list'))
+
+def deleteHits(request):
+    hitCreator = HitCreator()
+    hitCreator.deleteAllHits()
+
+    return HttpResponseRedirect(reverse('list'))
