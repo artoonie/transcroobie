@@ -78,7 +78,7 @@ def deleteAll(request):
 
     return HttpResponseRedirect(reverse('list'))
 
-def deleteHits(request):
+def deleteAllHits(request):
     hitCreator = HitCreator()
     hitCreator.deleteAllHits()
 

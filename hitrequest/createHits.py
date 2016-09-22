@@ -45,6 +45,7 @@ class HitCreator():
     def deleteAllHits(self):
         allHits = [hit for hit in self.connection.get_all_hits()]
         for hit in allHits:
+            print "Expiring hit ", hit
             self.connection.expire_hit(hit)
 
         # Approve hits:
