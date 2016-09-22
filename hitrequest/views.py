@@ -15,11 +15,6 @@ from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
 
 def list(request):
-    from django.core.files.storage import default_storage
-    default_storage.exists('storage_test')
-    file = default_storage.open('storage_test', 'w')
-    file.write('storage contents')
-    file.close()
     # Handle file upload
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
