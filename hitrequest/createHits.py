@@ -8,7 +8,7 @@ class HitCreator():
         AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
         AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
-        if os.environ.get("I_AM_IN_DEV_ENV") or os.environ.get("USE_AMT_SANDBOX"):
+        if bool(os.environ.get("I_AM_IN_DEV_ENV")) or bool(os.environ.get("USE_AMT_SANDBOX")):
             HOST = 'mechanicalturk.sandbox.amazonaws.com'
         else:
             HOST = 'mechanicalturk.amazonaws.com'
@@ -19,7 +19,7 @@ class HitCreator():
                 host=HOST)
 
     def createHitFromDocument(self, document):
-        if os.environ.get("I_AM_IN_DEV_ENV"):
+        if bool(os.environ.get("I_AM_IN_DEV_ENV")):
             baseurl = 'https://localhost:5000/hit/'
         else:
             baseurl = "https://transcroobie.herokuapp.com/hit/"
