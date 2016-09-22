@@ -135,5 +135,5 @@ AWS_S3_HOST = os.environ['AWS_S3_HOST']
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
 MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
-IS_DEV_ENV = os.environ['AWS_S3_HOST'] != "0"
-USE_AMT_SANDBOX = os.environ['USE_AMT_SANDBOX'] != "0"
+IS_DEV_ENV = str(os.environ.get('AWS_S3_HOST')) != "0"
+USE_AMT_SANDBOX = str(os.environ.get('USE_AMT_SANDBOX')) != "0"
