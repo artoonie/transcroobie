@@ -40,5 +40,6 @@ setup(
                       'pydub',
                       'boto',
                       'dj-database-url',
+                      'psycopg2',
                       'django-storages']
 )

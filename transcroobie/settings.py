@@ -79,9 +79,8 @@ WSGI_APPLICATION = 'transcroobie.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config()
-}
+import psycopg2
+DATABASES = {'default': dj_database_url.config()}
 
 
 # Password validation
