@@ -34,5 +34,11 @@ setup(
         ],
     },
     scripts=[ ],
-    install_requires=['django', 'gunicorn', 'whitenoise', 'pydub', 'boto', 'django-storages']
+    install_requires=['django'
+                      'gunicorn'
+                      'whitenoise'
+                      'pydub'
+                      'boto'
+                      'dj-database-url',
+                      'django-storages']
 )
