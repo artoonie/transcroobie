@@ -14,7 +14,7 @@ def splitAudioIntoParts(uploadedFilename, basedir):
     assert os.path.exists(uploadedFilename)
     track = AudioSegment.from_mp3(uploadedFilename)
     tracklen = len(track)
-    two_seconds = 10*1000
+    two_seconds = 2*1000
     ten_seconds = 10*1000
     num_segments = int(math.ceil(tracklen / ten_seconds))
     basename = basenameNoExt(uploadedFilename)
