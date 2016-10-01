@@ -8,14 +8,21 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from hitrequest.models import Document
 from hitrequest.forms import DocumentForm
 from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
 
+@csrf_exempt
 def list(request):
     # Handle file upload
+    request.upload_handlers.pop(0)
+    return _list(request)
+
+@csrf_protect
+def _list(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
