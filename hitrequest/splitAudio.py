@@ -14,14 +14,16 @@ def splitAudioIntoParts(uploadedFilename, basedir):
     assert os.path.exists(uploadedFilename)
     track = AudioSegment.from_mp3(uploadedFilename)
     tracklen = len(track)
+    two_seconds = 10*1000
     ten_seconds = 10*1000
     num_segments = int(math.ceil(tracklen / ten_seconds))
     basename = basenameNoExt(uploadedFilename)
 
     # Iterate over every ten-second segment
+    overlap = two_seconds
     for i in range(0, num_segments):
         start_time = i*ten_seconds
-        end_time = min((i+1)*ten_seconds, tracklen)
+        end_time = min((i+1)*ten_seconds+overlap, tracklen)
         curr_track = track[start_time:end_time]
 
         # Save the segment to a NamedTemporaryFile in basedir,
@@ -33,4 +35,3 @@ def splitAudioIntoParts(uploadedFilename, basedir):
                 dir = basedir) as currFilename:
             curr_track.export(currFilename.name, format="mp3")
             yield currFilename.name
-            return
