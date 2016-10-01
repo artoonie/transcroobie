@@ -90,3 +90,13 @@ def deleteAllHits(request):
     hitCreator.deleteAllHits()
 
     return HttpResponseRedirect(reverse('list'))
+
+def processHits(request):
+    hitCreator = HitCreator()
+    text = hitCreator.processHits()
+
+    render_data = {'processedHitText': text}
+    template = loader.get_template('hitrequest/text.html')
+    response = template.render(render_data, request)
+
+    return HttpResponse(response)

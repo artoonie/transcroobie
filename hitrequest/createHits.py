@@ -48,16 +48,20 @@ class HitCreator():
             print "Disabling hit ", hit.HITId
             self.connection.disable_hit(hit.HITId)
 
+    def processHits(self):
+        allHits = [hit for hit in self.connection.get_all_hits()]
+        responses = []
+
         # Approve hits:
-        # for hit in allHits:
-        #     assignments = self.connection.get_assignments(hit.HITId)
-        #     for assignment in assignments:
-        #         # don't ask me why this is a 2D list
-        #         question_form_answers = assignment.answers[0]
-        #         for question_form_answer in question_form_answers:
-        #             # "user-input" is the field I created and the only one I care about
-        #             if question_form_answer.qid == "user-input":
-        #                 user_response = question_form_answer.fields[0]
-        #                 print user_response
-        #                 print "\n"
-        #         self.connection.approve_assignment(assignment.AssignmentId)
+        for hit in allHits:
+            assignments = self.connection.get_assignments(hit.HITId)
+            for assignment in assignments:
+                # don't ask me why this is a 2D list
+                question_form_answers = assignment.answers[0]
+                for question_form_answer in question_form_answers:
+                    # "user-input" is the field I created and the only one I care about
+                    if question_form_answer.qid == "user-input":
+                        user_response = question_form_answer.fields[0]
+                        responses.append(user_response)
+                #self.connection.approve_assignment(assignment.AssignmentId)
+        return '\n'.join(responses)

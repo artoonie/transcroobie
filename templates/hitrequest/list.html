@@ -1,6 +1,3 @@
-<!--{% load static %}
-<source src="{% static "tracks/track01.mp3" %}" type="audio/mpeg">-->
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -45,6 +42,11 @@
         <form action="{% url 'deleteAllHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Delete all AMT HITs" />
+        </form>
+
+        <form action="{% url 'processHits' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="submit" value="Process completed AMT HITs" />
         </form>
     </body>
 </html> 
