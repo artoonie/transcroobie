@@ -2,6 +2,7 @@ from boto.mturk.connection import MTurkConnection
 from boto.mturk.question import ExternalQuestion
 from boto.mturk.price import Price
 from transcroobie import settings
+from . import overlap
 
 class HitCreator():
     def __init__(self):
@@ -49,19 +50,31 @@ class HitCreator():
             self.connection.disable_hit(hit.HITId)
 
     def processHits(self):
-        allHits = [hit for hit in self.connection.get_all_hits()]
         responses = []
+
+        for assignment in self.getAllAssignments():
+            # don't ask me why this is a 2D list
+            question_form_answers = assignment.answers[0]
+            for question_form_answer in question_form_answers:
+                # "user-input" is the field I created and the only one I care about
+                if question_form_answer.qid == "user-input":
+                    user_response = question_form_answer.fields[0]
+                    responses.append(user_response)
+        return overlap.combineSeveral(responses)
+
+    def approveAllHits(self):
+        # Approve hits:
+        for assignment in self.getAllAssignments():
+            self.connection.approve_assignment(assignment.AssignmentId)
+
+    def checkIfHitsReady(self):
+        return True
+
+    def getAllAssignments(self):
+        allHits = [hit for hit in self.connection.get_all_hits()]
 
         # Approve hits:
         for hit in allHits:
             assignments = self.connection.get_assignments(hit.HITId)
             for assignment in assignments:
-                # don't ask me why this is a 2D list
-                question_form_answers = assignment.answers[0]
-                for question_form_answer in question_form_answers:
-                    # "user-input" is the field I created and the only one I care about
-                    if question_form_answer.qid == "user-input":
-                        user_response = question_form_answer.fields[0]
-                        responses.append(user_response)
-                #self.connection.approve_assignment(assignment.AssignmentId)
-        return '\n'.join(responses)
+                yield assignment

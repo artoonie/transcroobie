@@ -100,3 +100,9 @@ def processHits(request):
     response = template.render(render_data, request)
 
     return HttpResponse(response)
+
+def approveAllHits(request):
+    hitCreator = HitCreator()
+    hitCreator.approveAllHits()
+
+    return HttpResponseRedirect(reverse('list'))

@@ -34,19 +34,25 @@
             <p><input type="submit" value="Upload" /></p>
         </form>
 
-        <form action="{% url 'deleteAll' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'processHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="submit" value="Delete all files" />
+            <input type="submit" value="Process completed AMT HITs" />
         </form>
 
+
+        <br><br><br><br><br><br>
+
+        <form action="{% url 'approveAllHits' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="submit" value="Approve completed AMT HITs" />
+        </form>
         <form action="{% url 'deleteAllHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Delete all AMT HITs" />
         </form>
-
-        <form action="{% url 'processHits' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'deleteAll' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="submit" value="Process completed AMT HITs" />
+            <input type="submit" value="Delete all files" />
         </form>
     </body>
 </html> 
