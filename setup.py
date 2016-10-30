@@ -41,5 +41,6 @@ setup(
                       'boto',
                       'dj-database-url',
                       'psycopg2',
-                      'django-storages']
+                      'django-storages',
+                      'google-api-python-client']
 )

@@ -6,7 +6,7 @@ def combine(a, b):
     def compare(x):
         ai, bi = int(x[0]), int(x[1])
         # print "Comparing ({}, {})".format(ai, bi)
-        currRatio = SequenceMatcher(None, a[ai:], b[0:bi]).ratio()
+        currRatio = SequenceMatcher(None, a[ai:].lower(), b[0:bi].lower()).ratio()
         length = (len(a) - ai) + bi
         currScore = length*currRatio*currRatio
         return currScore

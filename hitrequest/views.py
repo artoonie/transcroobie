@@ -14,6 +14,7 @@ from hitrequest.models import Document
 from hitrequest.forms import DocumentForm
 from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
+from hitrequest.speechrec import getTranscriptionFromURL
 
 @csrf_exempt
 def list(request):
@@ -23,6 +24,7 @@ def list(request):
 
 @csrf_protect
 def _list(request):
+    """ This is the trigger to take an uploaded file and create a HIT """
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -32,7 +34,7 @@ def _list(request):
             newdoc.save()
 
             # Get the paths of each of the split fileparts
-            for tmpFileObject in splitAudioIntoParts(localFilename.temporary_file_path(),
+            for (tmpFileObject, sampleRate) in splitAudioIntoParts(localFilename,
                     basedir = settings.MEDIA_ROOT):
                 relPath = os.path.relpath(tmpFileObject, settings.MEDIA_ROOT)
 
@@ -44,8 +46,18 @@ def _list(request):
                     currdoc = Document(docfile = fileCopy)
                     currdoc.save()
 
+                    # Get the transcript
+                    url = "gs://"+settings.GS_BUCKET_NAME+"/"+currdoc.docfile.name
+
+                    try:
+                        text, conf = getTranscriptionFromURL(url, sampleRate)
+                    except:
+                        text, conf = "", 0
+
+                    # TODO - do something with text/confidence
+
                     # Create a hit from this document
-                    hitCreator.createHitFromDocument(currdoc)
+                    hitCreator.createHitFromDocument(currdoc, text, conf)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))

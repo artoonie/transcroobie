@@ -79,7 +79,6 @@ WSGI_APPLICATION = 'transcroobie.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-import psycopg2
 DATABASES = {'default': dj_database_url.config()}
 
 
@@ -130,7 +129,13 @@ AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
 AWS_S3_HOST = os.environ['AWS_S3_HOST']
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+
+GS_ACCESS_KEY_ID = os.environ['GS_ACCESS_KEY_ID']
+GS_SECRET_ACCESS_KEY = os.environ['GS_SECRET_ACCESS_KEY']
+GS_BUCKET_NAME = os.environ['GS_BUCKET_NAME']
+
+DEFAULT_FILE_STORAGE = "storages.backends.gs.GSBotoStorage"
+#DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
 MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 
 IS_DEV_ENV = str(os.environ.get('I_AM_IN_DEV_ENV')) != "0"

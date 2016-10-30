@@ -60,7 +60,9 @@ class HitCreator():
                 if question_form_answer.qid == "user-input":
                     user_response = question_form_answer.fields[0]
                     responses.append(user_response)
-        return overlap.combineSeveral(responses)
+        eachString = '\n'.join(responses)
+        totalString = overlap.combineSeveral(responses)
+        return totalString+ "\n\n\nEach:\n"+ eachString
 
     def approveAllHits(self):
         # Approve hits:
