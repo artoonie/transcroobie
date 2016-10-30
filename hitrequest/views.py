@@ -57,7 +57,7 @@ def _list(request):
                     # TODO - do something with text/confidence
 
                     # Create a hit from this document
-                    hitCreator.createHitFromDocument(currdoc, text, conf)
+                    hitCreator.createHitFromDocument(currdoc)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
