@@ -20,6 +20,8 @@ def index(request):
 
     fileId = request.GET.get("docId", "")
     audioSnippet = get_object_or_404(AudioSnippet, pk = fileId)
+    # For testing: get the last upload
+    # audioSnippet = AudioSnippet.objects.order_by('id').reverse()[0]
 
     if len(audioSnippet.predictions) > 0:
         lastTranscription = audioSnippet.predictions[-1]

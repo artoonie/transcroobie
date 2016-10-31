@@ -18,5 +18,15 @@ def getTranscriptionFromURL(url, sampleRate):
 
     request = service.speech().syncrecognize(body=data)
     response = request.execute()
-    result = response['results'][0]['alternatives'][0]
-    return result['transcript'], result['confidence']
+
+    transcript = ""
+    confidence = 0
+
+    if response['results']:
+        results = response['results'][0]
+        if results['alternatives']:
+            result = results['alternatives'][0]
+            transcript = result['transcript']
+            confidence = result['confidence']
+
+    return transcript, confidence

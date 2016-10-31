@@ -1,4 +1,5 @@
 import os
+from urlparse import urlparse
 
 from django.template import loader
 from django.http import HttpResponseRedirect
@@ -44,20 +45,17 @@ def _list(request):
                 with open(tmpFileObject) as fileObj:
                     fileCopy = File(file=fileObj, name=relPath)
 
-                    # Get the transcript
-                    url = "gs://"+settings.GS_BUCKET_NAME+"/"+fileCopy.name
-
                     audioModel = AudioSnippet(audio = fileCopy,
                                               hasBeenValidated = False,
                                               predictions = [])
 
-                    try:
-                        text, confidence = getTranscriptionFromURL(url, sampleRate)
-                        audioModel.predictions.append(text)
-                        if float(confidence) > .99:
-                            audioModel.hasBeenValidated = True
-                    except:
-                        pass
+                    # Get the transcript
+                    audioModel.save() # upload fileCopy
+                    url = "gs://"+settings.GS_BUCKET_NAME+urlparse(audioModel.audio.url).path
+                    text, confidence = getTranscriptionFromURL(url, sampleRate)
+                    audioModel.predictions.append(text)
+                    if float(confidence) > .99:
+                        audioModel.hasBeenValidated = True
 
                     audioModel.save()
                     newdoc.audioSnippets.add(audioModel)
