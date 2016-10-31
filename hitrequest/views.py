@@ -10,7 +10,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-from hitrequest.models import Document
+from hitrequest.models import Document, AudioSnippet
 from hitrequest.forms import DocumentForm
 from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
@@ -29,9 +29,9 @@ def _list(request):
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             hitCreator = HitCreator()
-            localFilename = request.FILES['docfile']
+            localFilename = request.FILES['uploadedFile']
             newdoc = Document(docfile = localFilename)
-            newdoc.save()
+            newdoc.save() # TODO is this redundant?
 
             # Get the paths of each of the split fileparts
             for (tmpFileObject, sampleRate) in splitAudioIntoParts(localFilename,
@@ -43,21 +43,29 @@ def _list(request):
                 # write directly into the correct location?
                 with open(tmpFileObject) as fileObj:
                     fileCopy = File(file=fileObj, name=relPath)
-                    currdoc = Document(docfile = fileCopy)
-                    currdoc.save()
 
                     # Get the transcript
-                    url = "gs://"+settings.GS_BUCKET_NAME+"/"+currdoc.docfile.name
+                    url = "gs://"+settings.GS_BUCKET_NAME+"/"+fileCopy.name
+
+                    audioModel = AudioSnippet(audio = fileCopy,
+                                              hasBeenValidated = False,
+                                              predictions = [])
 
                     try:
-                        text, conf = getTranscriptionFromURL(url, sampleRate)
+                        text, confidence = getTranscriptionFromURL(url, sampleRate)
+                        audioModel.predictions.append(text)
+                        if float(confidence) > .99:
+                            audioModel.hasBeenValidated = True
                     except:
-                        text, conf = "", 0
+                        pass
 
-                    # TODO - do something with text/confidence
+                    audioModel.save()
+                    newdoc.audioSnippets.add(audioModel)
 
                     # Create a hit from this document
-                    hitCreator.createHitFromDocument(currdoc)
+                    hitCreator.createHitFromAudioSnippet(audioModel)
+
+            newdoc.save()
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
@@ -75,6 +83,9 @@ def _list(request):
     return HttpResponse(response)
 
 def _deleteDocument(docToDel):
+    for audioSnippet in docToDel.audioSnippets.all():
+        audioSnippet.audio.delete()
+        audioSnippet.delete()
     docToDel.docfile.delete()
     docToDel.delete()
 
@@ -83,7 +94,7 @@ def delete(request):
     if request.method != 'POST':
         raise Http404
 
-    docId = request.POST.get('docfile', None)
+    docId = request.POST.get('selectedDoc', None)
     docToDel = get_object_or_404(Document, pk = docId)
     _deleteDocument(docToDel)
 

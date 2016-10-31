@@ -16,7 +16,7 @@ class HitCreator():
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 host=HOST)
 
-    def createHitFromDocument(self, document):
+    def createHitFromAudioSnippet(self, audioSnippet):
         if settings.IS_DEV_ENV:
             baseurl = 'https://localhost:5000/hit/'
         else:
@@ -29,7 +29,7 @@ class HitCreator():
         frame_height = 800
         amount = 0.05
 
-        thisDocUrl = baseurl + "?docId=" + str(document.pk)
+        thisDocUrl = baseurl + "?docId=" + str(audioSnippet.pk)
         questionform = ExternalQuestion(thisDocUrl, frame_height)
 
         create_hit_result = self.connection.create_hit(

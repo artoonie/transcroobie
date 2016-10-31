@@ -12,7 +12,7 @@
             <li>
             <form action="{% url 'delete' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="hidden" name="docfile" value="{{ document.pk }}" />
+                <input type="hidden" name="selectedDoc" value="{{ document.pk }}" />
                 <input type="submit" value="[x]" />
                 <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
             </form>
@@ -26,10 +26,10 @@
         <form action="{% url 'list' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>{{ form.non_field_errors }}</p>
-            <p>{{ form.docfile.label_tag }} {{ form.docfile.help_text }}</p>
+            <p>{{ form.uploadedFile.label_tag }} {{ form.uploadedFile.help_text }}</p>
             <p>
-                {{ form.docfile.errors }}
-                {{ form.docfile }}
+                {{ form.uploadedFile.errors }}
+                {{ form.uploadedFile }}
             </p>
             <p><input type="submit" value="Upload" /></p>
         </form>
