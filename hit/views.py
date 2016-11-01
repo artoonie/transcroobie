@@ -11,8 +11,7 @@ if settings.IS_DEV_ENV or settings.USE_AMT_SANDBOX:
 else:
     AMAZON_HOST = "https://www.mturk.com/mturk/externalSubmit"
 
-@xframe_options_exempt
-def index(request):
+def getRenderDataFor(request):
     disabledText = "" # To be placed at the end of the submit <input> tag
     if request.GET.get("assignmentId") == "ASSIGNMENT_ID_NOT_AVAILABLE":
         # worker hasn't accepted the HIT (task) yet
@@ -28,7 +27,7 @@ def index(request):
     else:
         lastTranscription = ""
 
-    render_data = {
+    renderData = {
         "worker_id": request.GET.get("workerId", ""),
         "assignment_id": request.GET.get("assignmentId", ""),
         "amazon_host": AMAZON_HOST,
@@ -37,9 +36,26 @@ def index(request):
         "lastTranscription": lastTranscription,
         "isDisabled": disabledText
     }
+    return renderData
 
-    template= loader.get_template('hit/client.html')
-    response = template.render(render_data, request)
+
+@xframe_options_exempt
+def fixHIT(request):
+    renderData = getRenderDataFor(request)
+    template= loader.get_template('hit/fixHIT.html')
+    response = template.render(renderData, request)
 
     return HttpResponse(response)
 
+@xframe_options_exempt
+def checkHIT(request):
+    renderData = getRenderDataFor(request)
+    transcriptionList = renderData['lastTranscription'].split(' ')
+    withEllipses = ["..."]
+    withEllipses.extend(transcriptionList)
+    withEllipses.append("...")
+    renderData['lastTranscription'] = withEllipses
+    template= loader.get_template('hit/checkHIT.html')
+    response = template.render(renderData, request)
+
+    return HttpResponse(response)
