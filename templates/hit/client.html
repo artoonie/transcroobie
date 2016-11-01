@@ -1,19 +1,84 @@
-<h3>Transcribe the audio below.</h3>
-<h4>Don't worry about words cut off at the beginning or end. If the existing text
+<style>
+html {
+    font-family:"Tahoma"
+}
+h1 {
+    font-size: 36pt;
+}
+textarea {
+    width: 600px;
+    height: 300px;
+    border: 3px solid #cccccc;
+    outline: none;
+
+    padding: 5px;
+    font-family: Tahoma, sans-serif;
+    font-size: 22pt;
+
+    -webkit-transition:all 0.1s linear;
+    -moz-transition:all 0.1s linear;
+    -o-transition:all 0.1s linear;
+    transition:all 0.1s linear;
+}
+
+input[type=submit] {
+    padding:5px 15px; 
+    border:0 none;
+    cursor:pointer;
+    -webkit-border-radius: 5px;
+    border-radius: 5px; 
+    color:#FFFFFF;
+    font-size:20pt;
+}
+input[type=submit]:disabled {
+    background:#cccccc;
+}
+input[type=submit]:enabled {
+    background:#77a809;
+    cursor:pointer;
+}
+
+audio:hover, audio:focus, audio:active, textarea:hover, textarea:focus, textarea:active
+{
+    -webkit-box-shadow: 2px 2px 4px #006773;
+    -moz-box-shadow: 2px 2px 4px #006773;
+    box-shadow: 2px 2px 4px #006773;
+}
+audio
+{
+    width: 600px;
+    -webkit-transition:all 0.1s linear;
+    -moz-transition:all 0.1s linear;
+    -o-transition:all 0.1s linear;
+    transition:all 0.1s linear;
+    -moz-box-shadow: 2px 2px 4px 0px rgba(0,0, 0, 0.4);
+    -webkit-box-shadow:  2px 2px 4px 0px rgba(0,0, 0, 0.4);
+    box-shadow: 2px 2px 4px 0px rgba(0,0, 0, 0.4);
+    -moz-border-radius:7px 7px 7px 7px ;
+    -webkit-border-radius:7px 7px 7px 7px ;
+    border-radius:7px 7px 7px 7px ;
+}
+
+</style>
+
+<h1>Transcribe the audio</h3>
+<h2>Do not worry about words cut off at the beginning or end.<br />If the existing text
 is already correct, do not change it and just hit submit.</h4>
 
 <audio controls>
   <source src="{{ audioSnippet.audio.url }}" type="audio/mpeg">
 Your browser does not support the audio element.
 </audio>
+<br />
+<br />
 
 <form action="{{ amazon_host }}" method="POST">
-    <textarea rows="4" cols="50" name="user-input">{{ lastTranscription }}</textarea>
+    <textarea name="user-input">{{ lastTranscription }}</textarea>
     <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
     <br/>
     <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
     <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
-    <input type="submit" {{isDisabled}} />
+    <input class="submitButton" type="submit" {{isDisabled}} />
 </form>
 <div>
 </div>
