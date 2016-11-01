@@ -40,7 +40,7 @@ input[type=submit]:enabled {
 
 audio:hover, audio:focus, audio:active,
 textarea:hover, textarea:focus, textarea:active,
-input:hover
+input[type=submit]:hover
 {
     -webkit-box-shadow: 2px 2px 4px #006773;
     -moz-box-shadow: 2px 2px 4px #006773;
@@ -95,31 +95,34 @@ audio
 </style>
 
 <script type="text/javascript">
+    var numWords = {{lastTranscription|length}}
+
     function toggleClass(e) {
        if(e.className == "wordSelected")
           e.className = "wordUnselected";
        else
           e.className = "wordSelected";
+        prepareResult()
+    }
+    function prepareResult() {
+        var res = new Array(numWords);
+        for (i = 0; i < numWords; i++) { 
+            var elem = document.getElementById('word_'+i);
+            var elemClass = elem.className;
+            if (elemClass == "wordSelected") {
+                res[i] = true;
+            } else if (elemClass == "wordUnselected") {
+                res[i] = false;
+            } else {
+                res[i] = "ERROR";
+            }
+        }
+        document.getElementById("checkHITResult").value = res;
+    }
+    window.onload = function(){
+        prepareResult()
     }
 </script>
-<!--
-<script type="text/javascript">
-function get_selection() {
-    var word = '';
-    if (window.getSelection) {
-        word = window.getSelection().toString();
-    } else if (document.selection) {
-        word = document.selection.createRange().text;
-    }
-    document.getElementById("out").innerHTML = word;
-}
-
-window.onload = function(){
-    document.getElementById("txt").onclick = get_selection;
-}
-
-</script>
--->
 
 <h1>Select all words that do not match the audio clip</h1>
 <h2>Please ignore words cut off at the beginning or end of the cilp.</h2>
@@ -133,10 +136,17 @@ Your browser does not support the audio element.
 <br />
 <br />
 
+<div id="transcriptionText">
 {% for word in lastTranscription %}
-    <span class="wordUnselected" onclick="toggleClass(this)"><a href="#">{{ word }}</a></span>
+    <span id="word_{{forloop.counter0}}" class="wordUnselected" onclick="toggleClass(this)"><a href="#">{{ word }}</a></span>
 {% endfor %}
+</div>
+
 <form action="{{ amazon_host }}" method="POST">
+    <input type="hidden" name="user-input" id="checkHITResult" value="">
+    <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
+    <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
+    <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
     <input class="submitButton" type="submit" {{isDisabled}} />
 </form>
 <div>
