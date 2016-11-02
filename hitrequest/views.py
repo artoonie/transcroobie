@@ -57,11 +57,9 @@ def _list(request):
                     if float(confidence) > .99:
                         audioModel.hasBeenValidated = True
 
-                    audioModel.save()
-                    newdoc.audioSnippets.add(audioModel)
-
                     # Create a hit from this document
-                    hitCreator.createHitFromAudioSnippet(audioModel)
+                    hitCreator.createHitFrom(audioModel, 'check')
+                    newdoc.audioSnippets.add(audioModel) # this saves audioModel
 
             newdoc.save()
 
@@ -103,6 +101,10 @@ def deleteAll(request):
     documents = Document.objects.all()
     for docToDel in documents:
         _deleteDocument(docToDel)
+
+    audioSnippets = AudioSnippet.objects.all()
+    for audioSnippet in audioSnippets:
+        audioSnippets.delete()
 
     return HttpResponseRedirect(reverse('list'))
 

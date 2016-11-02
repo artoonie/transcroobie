@@ -75,11 +75,12 @@ Your browser does not support the audio element.
 <br />
 
 <form action="{{ amazon_host }}" method="POST">
-    <textarea name="user-input">{{ lastTranscription }}</textarea>
+    <textarea name="fixedHITResult">{{ lastTranscription }}</textarea>
     <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
     <br/>
-    <input type="hidden" id="workerId" value="{{ worker_id }}" name="workerId"/>
-    <input type="hidden" id="hitId" value="{{ hit_id }}" name="hitId"/>
+    <input type="hidden" id="asFileId" name="asFileId" value="{{ as_file_id }}">
+    <input type="hidden" id="workerId" name="workerId" value="{{ worker_id }}"/>
+    <input type="hidden" id="hitId" name="hitId" value="{{ hit_id }}" />
     <input class="submitButton" type="submit" {{isDisabled}} />
 </form>
 <div>

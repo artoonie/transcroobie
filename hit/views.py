@@ -32,6 +32,7 @@ def getRenderDataFor(request):
         "assignment_id": request.GET.get("assignmentId", ""),
         "amazon_host": AMAZON_HOST,
         "hit_id": request.GET.get("hitId", ""),
+        "as_file_id": fileId,
         "audioSnippet": audioSnippet,
         "lastTranscription": lastTranscription,
         "isDisabled": disabledText
