@@ -62,6 +62,24 @@ audio
 }
 
 </style>
+<!--<script type="text/javascript">
+    var numWords = {{lastTranscription|length}}
+    function prepareResult() {
+        var res = "";
+        for (i = 0; i < numWords; i++) { 
+            var elem = document.getElementById('word_'+i);
+            if (elem.nodeName == "INPUT") {
+                res += elem.value + " "
+            } else {
+                res += elem.innerHTML + " "
+            }
+        }
+        document.getElementById("fixedHITResult").value = res;
+    }
+    window.onload = function(){
+        prepareResult()
+    }
+</script>-->
 
 <h1>Correct the transcript</h3>
 <h2>Do not worry about words cut off at the beginning or end.</h4>
@@ -73,18 +91,18 @@ Your browser does not support the audio element.
 <br />
 <br />
 
-<div id="transcriptionText">
-{% for word, check in lastTranscription %}
-    {% if check %}
-        <input type="text" value="{{word}}"></input>
-    {% else %}
-        <span class="wordUnselected" size="5">{{word}}</span>
-    {% endif %}
-{% endfor %}
-
-</div>
-
 <form action="{{ amazon_host }}" method="POST">
+    <div id="transcriptionText">
+    {% for word, check in lastTranscription %}
+        {% if check %}
+            <span class="wordUnselected" id="word_{{forloop.counter0}}" size="5">{{word}}</span>
+        {% else %}
+            <input type="text" name="word_{{forloop.counter0}}" value="{{word}}">
+        {% endif %}
+    {% endfor %}
+    </div>
+
+    <input type="hidden" name="fixedHITResult" id="fixedHITResult" value="">
     <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
     <br/>
     <input type="hidden" id="asFileId" name="asFileId" value="{{ as_file_id }}">

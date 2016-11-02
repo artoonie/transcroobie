@@ -75,29 +75,37 @@ class HitCreator():
         hitType = None
         response = None
         audioSnippet = None
-        ans = []
-        resp = []
-        for questionFormAnswer in questionFormAnswers:
-            ans.append(questionFormAnswer.qid)
-            resp.append(questionFormAnswer.fields)
+        fixWords = {}
         for questionFormAnswer in questionFormAnswers:
             if questionFormAnswer.qid == "asFileId":
                 asFileId = questionFormAnswer.fields[0]
                 audioSnippet = get_object_or_404(AudioSnippet, pk = asFileId)
             elif questionFormAnswer.qid == "fixedHITResult":
                 hitType = "fix"
-                response = questionFormAnswer.fields[0]
+                response = None # need to look at word_%d based on audiosnippet
+            elif questionFormAnswer.qid.startswith("word_"):
+                fixWords[questionFormAnswer.qid] = questionFormAnswer.fields[0]
             elif questionFormAnswer.qid == "checkedHITResult":
                 hitType = "check"
                 responseStr = questionFormAnswer.fields[0]
                 response = [val == 'true' for val in responseStr.split(',')]
 
-        assert response
-        assert audioSnippet
-        assert hitType
-
         if hitType == "fix":
+            incorrectWords = audioSnippet.incorrectWords[-1]
+            prediction = audioSnippet.predictions[-1].split(' ')
+            response = ""
+            assert len(incorrectWords) == len(prediction) + 2
+            for i in xrange(len(prediction) + 2): # + 2 for ellipses at start/end
+                if not incorrectWords[i]:
+                    response += fixWords["word_" + str(i)] + " "
+                else:
+                    # if not in this range, we are looking at the ellipses
+                    # at the start/end, which we only want to add if they've
+                    # been marked incorrect
+                    if i > 0 and i <= len(prediction):
+                        response += prediction[i-1] + " "
             audioSnippet.predictions.append(response)
+
             # Always do a check after a fix
             completionStatus = CompletionStatus.incomplete
         else:
