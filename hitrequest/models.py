@@ -27,6 +27,9 @@ class AudioSnippet(models.Model):
     # Has the last prediction been validated?
     hasBeenValidated = models.BooleanField(default=False)
 
+    # Are we done looking at this HIT? (Potentially given up without validation?)
+    isComplete = models.BooleanField(default=False)
+
 class Document(models.Model):
     docfile = models.FileField(upload_to='documents/%Y/%m/%d')
 

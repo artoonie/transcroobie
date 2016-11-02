@@ -10,7 +10,7 @@ from . import overlap
 from hitrequest.models import AudioSnippet
 from transcroobie import settings
 
-class AudioSnippetCompletionStatus(IntEnum):
+class CompletionStatus(IntEnum):
     incomplete = 0,
     correct = 1,
     givenup = 2,
@@ -70,6 +70,8 @@ class HitCreator():
             self.connection.disable_hit(hit.HITId)
 
     def processHit(self, questionFormAnswers):
+        # Process each HIT only once. This function will set activeHITId to ""
+        # to let you know that the HIT is completed and processed.
         hitType = None
         response = None
         audioSnippet = None
@@ -93,93 +95,97 @@ class HitCreator():
         assert response
         assert audioSnippet
         assert hitType
-        return {
-            'hitType': hitType,
-            'response': response,
-            'audioSnippet': audioSnippet
-        }
 
-    def getCompletionStatus(self, responseStruct):
+        if hitType == "fix":
+            audioSnippet.predictions.append(response)
+            # Always do a check after a fix
+            completionStatus = CompletionStatus.incomplete
+        else:
+            completionStatus = self.getCompletionStatus(audioSnippet, response)
+            if completionStatus == CompletionStatus.correct:
+                audioSnippet.hasBeenValidated = True
+                audioSnippet.isComplete = True
+            elif completionStatus == CompletionStatus.givenup:
+                audioSnippet.hasBeenValidated = False
+                audioSnippet.isComplete = True
+        audioSnippet.activeHITId = ""
+
+        if completionStatus == CompletionStatus.incomplete:
+            if hitType == "check":
+                # CHECK task complete. Create a FIX task (since not # hasBeenValidated)
+                self.createHitFrom(audioSnippet, 'fix')
+            elif hitType == "fix":
+                # FIX task complete. Create a CHECK task.
+                self.createHitFrom(audioSnippet, 'check')
+
+        audioSnippet.save()
+
+    def getCompletionStatus(self, audioSnippet, response):
         # only callwhen all hitTypes == "check"
-        # returns an AudioSnippetCompletionStatus
-        assert responseStruct['hitType'] == "check"
+        # returns a CompletionStatus
         MAX_NUM_PREDICTIONS = 2
 
-        completionStatus = AudioSnippetCompletionStatus.incomplete
-        audioSnippet = responseStruct['audioSnippet']
-        if all(responseStruct['response']):
-            completionStatus = AudioSnippetCompletionStatus.correct
-            audioSnippet.hasBeenValidated = True
-            audioSnippet.save()
+        completionStatus = CompletionStatus.incomplete
+        if all(response):
+            completionStatus = CompletionStatus.correct
         elif len(audioSnippet.predictions) > MAX_NUM_PREDICTIONS:
-            completionStatus = AudioSnippetCompletionStatus.givenup
-            audioSnippet.hasBeenValidated = True
-            audioSnippet.save()
+            completionStatus = CompletionStatus.givenup
         return completionStatus
 
     def processHits(self):
-        responseStructs = []
-
         audioSnippets = AudioSnippet.objects.order_by('id')
-        responses = [a.predictions[-1] for a in audioSnippets]
-        eachString = '\n'.join(responses)
 
         assignments = []
         for audioSnippet in audioSnippets:
             hitID = audioSnippet.activeHITId
+            if not hitID: continue
             hit = self.connection.get_hit(hitID)
             asgnForHit = self.connection.get_assignments(hit[0].HITId)
-            for asgn in asgnForHit:
-                assignments.append(asgn)
+            if asgnForHit:
+                # Hit is ready. Get the data.
+                for asgn in asgnForHit:
+                    assignments.append(asgn)
+                    questionFormAnswers = asgn.answers[0]
+                    self.processHit(questionFormAnswers)
 
-        for assignment in assignments:
-            questionFormAnswers = assignment.answers[0]
-            responseStruct = self.processHit(questionFormAnswers)
-            responseStructs.append(responseStruct)
+        responses = [a.predictions[-1] for a in audioSnippets]
+        eachString = '\n'.join(responses)
+        statuses = [a.isComplete for a in audioSnippets]
+        if all([a.hasBeenValidated for s in statuses]):
+            # All tasks complete and validated
+            totalString = overlap.combineSeveral(responses)
 
+            res = "Correct transcript:\n" + totalString
+            res += "\n\n\nEach:\n" + eachString
+            return res
+        elif all([a.isComplete for a in audioSnippets]):
+            # All tasks complete, but some may not be validated
+            totalString = overlap.combineSeveral(responses)
+            res = "Potentially incorrect transcript. Our best guess is:\n"
+            res += totalString
+            res += "\n\n Unverified strings marked with (*):\n"
+            for i, s in enumerate(audioSnippet):
+                if not a.hasBeenValidated:
+                    res += "* "
+                else:
+                    res += "  "
+                res += s + "\n"
+            return res
+        else:
+            # Not all tasks complete yet.
+            res = "Some AMT tasks still pending. HIT status: \n"
+            for a in audioSnippets:
+                if a.isComplete:
+                    if a.hasBeenValidated:
+                        res += "\n COMPLETE: "
+                    else:
+                        res += "\n GIVEN UP: "
+                else:
+                    assert a.activeHITId
+                    res += "\n PENDING ({}): ".format(a.activeHITId)
+                res += a.predictions[-1]
 
-        if all([x['hitType'] == 'check' for x in responseStructs]):
-            statuses = [self.getCompletionStatus(x) for x in responseStructs]
-            if all([s == AudioSnippetCompletionStatus.correct for s in statuses]):
-                totalString = overlap.combineSeveral(responses)
-
-                res = "Correct transcript:\n" + totalString
-                res += "\n\n\nEach:\n" + eachString
-                return res
-            elif all([s == AudioSnippetCompletionStatus.correct or
-                    s == AudioSnippetCompletionStatus.givenup for x in statuses]):
-                totalString = overlap.combineSeveral(responses)
-                res = "Potentially incorrect transcript. Our best guess is:\n"
-                res += totalString
-                res += "\n\n Unconfirmed strings marked with (*):\n"
-                for i, s in enumerate(responses):
-                    if statuses[i] == AudioSnippetCompletionStatus.givenup:
-                        res += "* "
-                    res += s + "\n"
-                return res
-
-        res = "Some AMT tasks still pending. HIT status: \n"
-
-        for r in responseStructs:
-            if r['audioSnippet'].hasBeenValidated:
-                status = self.getCompletionStatus(r)
-                if status == AudioSnippetCompletionStatus.correct:
-                    res += "\n COMPLETE"
-                elif status == AudioSnippetCompletionStatus.givenup:
-                    res += "\n GIVEN UP"
-                assert status != AudioSnippetCompletionStatus.incomplete
-            elif r['hitType'] == "check" and self.isTaskReady(r['audioSnippet'].activeHITId):
-                # CHECK task complete. Create a FIX task (since not # hasBeenValidated)
-                self.createHitFrom(r['audioSnippet'], 'fix')
-                res += "\n FIXIN UP"
-            elif r['hitType'] == "fix" and self.isTaskReady(r['audioSnippet'].activeHITId):
-                # FIX task complete. Create a CHECK task.
-                self.createHitFrom(r['audioSnippet'], 'check')
-                res += "\n VERIFYIN"
-            res += str(r['audioSnippet'].id) + ":"
-            res += " (" + r['audioSnippet'].predictions[-1] + ")"
-
-        return res
+            return res
 
     def isTaskReady(self, hitID):
         return len(self.connection.get_assignments(hitID)) > 0
