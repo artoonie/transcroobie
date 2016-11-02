@@ -23,9 +23,13 @@ def getRenderDataFor(request):
     # audioSnippet = AudioSnippet.objects.order_by('id').reverse()[0]
 
     if len(audioSnippet.predictions) > 0:
-        lastTranscription = audioSnippet.predictions[-1]
+        lastTranscription = audioSnippet.predictions[-1].split(' ')
     else:
         lastTranscription = ""
+
+    withEllipses = ["..."]
+    withEllipses.extend(lastTranscription)
+    withEllipses.append("...")
 
     renderData = {
         "worker_id": request.GET.get("workerId", ""),
@@ -34,7 +38,7 @@ def getRenderDataFor(request):
         "hit_id": request.GET.get("hitId", ""),
         "as_file_id": fileId,
         "audioSnippet": audioSnippet,
-        "lastTranscription": lastTranscription,
+        "lastTranscription": withEllipses,
         "isDisabled": disabledText
     }
     return renderData
@@ -44,6 +48,18 @@ def getRenderDataFor(request):
 def fixHIT(request):
     renderData = getRenderDataFor(request)
     template= loader.get_template('hit/fixHIT.html')
+    audioSnippet = renderData['audioSnippet']
+    incorrectWords = audioSnippet.incorrectWords[-1]
+
+    txt = ""
+    for i, t in enumerate(renderData['lastTranscription']):
+        if incorrectWords[i]:
+            txt += "WRONG" + t + "\n"
+        else:
+            txt += "RIGHT" + t + "\n"
+    lt = renderData['lastTranscription']
+    renderData['lastTranscription'] = zip(lt, incorrectWords)
+
     response = template.render(renderData, request)
 
     return HttpResponse(response)
@@ -51,11 +67,6 @@ def fixHIT(request):
 @xframe_options_exempt
 def checkHIT(request):
     renderData = getRenderDataFor(request)
-    transcriptionList = renderData['lastTranscription'].split(' ')
-    withEllipses = ["..."]
-    withEllipses.extend(transcriptionList)
-    withEllipses.append("...")
-    renderData['lastTranscription'] = withEllipses
     template= loader.get_template('hit/checkHIT.html')
     response = template.render(renderData, request)
 

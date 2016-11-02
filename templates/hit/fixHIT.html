@@ -63,9 +63,8 @@ audio
 
 </style>
 
-<h1>Transcribe the audio</h3>
-<h2>Do not worry about words cut off at the beginning or end.<br />If the existing text
-is already correct, do not change it and just hit submit.</h4>
+<h1>Correct the transcript</h3>
+<h2>Do not worry about words cut off at the beginning or end.</h4>
 
 <audio controls>
   <source src="{{ audioSnippet.audio.url }}" type="audio/mpeg">
@@ -74,8 +73,18 @@ Your browser does not support the audio element.
 <br />
 <br />
 
+<div id="transcriptionText">
+{% for word, check in lastTranscription %}
+    {% if check %}
+        <input type="text" value="{{word}}"></input>
+    {% else %}
+        <span class="wordUnselected" size="5">{{word}}</span>
+    {% endif %}
+{% endfor %}
+
+</div>
+
 <form action="{{ amazon_host }}" method="POST">
-    <textarea name="fixedHITResult">{{ lastTranscription }}</textarea>
     <input type="hidden" id="assignmentId" value="{{ assignment_id }}" name="assignmentId"/>
     <br/>
     <input type="hidden" id="asFileId" name="asFileId" value="{{ as_file_id }}">

@@ -101,6 +101,7 @@ class HitCreator():
             # Always do a check after a fix
             completionStatus = CompletionStatus.incomplete
         else:
+            audioSnippet.incorrectWords.append(response)
             completionStatus = self.getCompletionStatus(audioSnippet, response)
             if completionStatus == CompletionStatus.correct:
                 audioSnippet.hasBeenValidated = True
