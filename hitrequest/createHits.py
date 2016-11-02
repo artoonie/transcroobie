@@ -91,7 +91,7 @@ class HitCreator():
                 response = [val == 'true' for val in responseStr.split(',')]
 
         if hitType == "fix":
-            incorrectWords = audioSnippet.incorrectWords[-1]
+            incorrectWords = audioSnippet.incorrectWords['bools'][-1]
             prediction = audioSnippet.predictions[-1].split(' ')
             response = ""
             assert len(incorrectWords) == len(prediction) + 2
@@ -109,7 +109,7 @@ class HitCreator():
             # Always do a check after a fix
             completionStatus = CompletionStatus.incomplete
         else:
-            audioSnippet.incorrectWords.append(response)
+            audioSnippet.incorrectWords['bools'].append(response)
             completionStatus = self.getCompletionStatus(audioSnippet, response)
             if completionStatus == CompletionStatus.correct:
                 audioSnippet.hasBeenValidated = True

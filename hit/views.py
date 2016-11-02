@@ -49,7 +49,7 @@ def fixHIT(request):
     renderData = getRenderDataFor(request)
     template= loader.get_template('hit/fixHIT.html')
     audioSnippet = renderData['audioSnippet']
-    incorrectWords = audioSnippet.incorrectWords[-1]
+    incorrectWords = audioSnippet.incorrectWords['bools'][-1]
 
     txt = ""
     for i, t in enumerate(renderData['lastTranscription']):

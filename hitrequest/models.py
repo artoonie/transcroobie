@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 
 class AudioSnippet(models.Model):
     audio = models.FileField(upload_to='audioparts/%Y-%m-%d')
@@ -13,13 +13,8 @@ class AudioSnippet(models.Model):
     )
 
     # List of incorrectly transcribed words (as determined by AMT)
-    incorrectWords = ArrayField(
-        ArrayField(
-            models.BooleanField(),
-            default = []
-        ),
-        default = []
-    )
+    # Can't be a multi-d array because it would not be rectangular
+    incorrectWords = JSONField( default = {'bools': [] })
 
     # Has the last prediction been validated?
     activeHITId = models.CharField(max_length=30)
