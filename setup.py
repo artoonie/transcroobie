@@ -35,6 +35,7 @@ setup(
     },
     scripts=[ ],
     install_requires=['django',
+                      'enum34',
                       'gunicorn',
                       'whitenoise',
                       'pydub',
