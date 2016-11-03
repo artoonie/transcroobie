@@ -41,4 +41,3 @@ def splitAudioIntoParts(uploadedFile, basedir):
                 dir = basedir) as currFilename:
             curr_track.export(currFilename.name, format="wav", bitrate="192k")
             yield (currFilename.name, sampleRate)
-            return # only once
