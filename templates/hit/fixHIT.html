@@ -1,26 +1,16 @@
 <style>
-html {
-    font-family:"Tahoma"
+html, input[type=text] {
+    font-family:"Tahoma";
+    font-size: 18pt;
+}
+input[type=text] {
+    width: 200px;
+    text-align: center;
+    border-color: red;
 }
 h1 {
     font-size: 36pt;
 }
-textarea {
-    width: 600px;
-    height: 300px;
-    border: 3px solid #cccccc;
-    outline: none;
-
-    padding: 5px;
-    font-family: Tahoma, sans-serif;
-    font-size: 22pt;
-
-    -webkit-transition:all 0.1s linear;
-    -moz-transition:all 0.1s linear;
-    -o-transition:all 0.1s linear;
-    transition:all 0.1s linear;
-}
-
 input[type=submit] {
     padding:5px 15px; 
     border:0 none;
@@ -62,27 +52,9 @@ audio
 }
 
 </style>
-<!--<script type="text/javascript">
-    var numWords = {{lastTranscription|length}}
-    function prepareResult() {
-        var res = "";
-        for (i = 0; i < numWords; i++) { 
-            var elem = document.getElementById('word_'+i);
-            if (elem.nodeName == "INPUT") {
-                res += elem.value + " "
-            } else {
-                res += elem.innerHTML + " "
-            }
-        }
-        document.getElementById("fixedHITResult").value = res;
-    }
-    window.onload = function(){
-        prepareResult()
-    }
-</script>-->
 
-<h1>Correct the transcript</h3>
-<h2>Do not worry about words cut off at the beginning or end.</h4>
+<h1>Correct the transcript for words highlighted in red</h1>
+<h2>Do not worry about words cut off at the beginning or end.</h2>
 
 <audio controls>
   <source src="{{ audioSnippet.audio.url }}" type="audio/mpeg">

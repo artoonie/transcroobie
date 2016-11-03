@@ -23,7 +23,8 @@ def getRenderDataFor(request):
     # audioSnippet = AudioSnippet.objects.order_by('id').reverse()[0]
 
     if len(audioSnippet.predictions) > 0:
-        lastTranscription = audioSnippet.predictions[-1].split(' ')
+        lastTranscription = audioSnippet.predictions[-1].split()
+        assert lastTranscription[-1] != ""
     else:
         lastTranscription = ""
 

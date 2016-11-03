@@ -92,7 +92,7 @@ class HitCreator():
 
         if hitType == "fix":
             incorrectWords = audioSnippet.incorrectWords['bools'][-1]
-            prediction = audioSnippet.predictions[-1].split(' ')
+            prediction = audioSnippet.predictions[-1].split()
             response = ""
             assert len(incorrectWords) == len(prediction) + 2
             for i in xrange(len(prediction) + 2): # + 2 for ellipses at start/end
