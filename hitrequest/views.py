@@ -1,6 +1,7 @@
 import os
 from urlparse import urlparse
 
+from boto.exception import GSResponseError
 from django.template import loader
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
@@ -82,7 +83,11 @@ def _deleteDocument(docToDel):
     for audioSnippet in docToDel.audioSnippets.all():
         audioSnippet.audio.delete()
         audioSnippet.delete()
-    docToDel.docfile.delete()
+    try:
+        # The file may have been deleted remotely or not successfully uploaded
+        docToDel.docfile.delete()
+    except GSResponseError:
+        pass
     docToDel.delete()
 
 def delete(request):
