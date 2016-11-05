@@ -1,7 +1,9 @@
 import os
+import tempfile
 from urlparse import urlparse
 
 from boto.exception import GSResponseError
+from celery.utils.log import get_task_logger
 from django.template import loader
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
@@ -17,6 +19,9 @@ from hitrequest.forms import DocumentForm
 from hitrequest.splitAudio import splitAudioIntoParts
 from hitrequest.createHits import HitCreator
 from hitrequest.speechrec import getTranscriptionFromURL
+from transcroobie.celery import app
+
+logger = get_task_logger(__name__)
 
 @csrf_exempt
 def list(request):
@@ -30,39 +35,20 @@ def _list(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
-            hitCreator = HitCreator()
-            localFilename = request.FILES['uploadedFile']
-            newdoc = Document(docfile = localFilename)
-            newdoc.save() # TODO is this redundant?
-
-            # Get the paths of each of the split fileparts
-            for (tmpFileObject, sampleRate) in splitAudioIntoParts(localFilename,
-                    basedir = settings.MEDIA_ROOT):
-                relPath = os.path.relpath(tmpFileObject, settings.MEDIA_ROOT)
-
-                # Open the file, copy into to the database's storage.
-                # TODO - inefficient copying - how can splitAudioIntoParts
-                # write directly into the correct location?
-                with open(tmpFileObject) as fileObj:
-                    fileCopy = File(file=fileObj, name=relPath)
-
-                    audioModel = AudioSnippet(audio = fileCopy,
-                                              hasBeenValidated = False,
-                                              predictions = [])
-
-                    # Get the transcript
-                    audioModel.save() # upload fileCopy
-                    url = "gs://"+settings.GS_BUCKET_NAME+urlparse(audioModel.audio.url).path
-                    text, confidence = getTranscriptionFromURL(url, sampleRate)
-                    audioModel.predictions.append(text)
-                    if float(confidence) > .99:
-                        audioModel.hasBeenValidated = True
-
-                    # Create a hit from this document
-                    hitCreator.createHitFrom(audioModel, 'check')
-                    newdoc.audioSnippets.add(audioModel) # this saves audioModel
-
+            uploadedFile = request.FILES['uploadedFile']
+            newdoc = Document(docfile = uploadedFile)
             newdoc.save()
+
+            usersFilename = uploadedFile.name
+            _, extension = os.path.splitext(usersFilename)
+
+            tmpFile = tempfile.NamedTemporaryFile(suffix=extension, delete=False)
+            with open(tmpFile.name, 'wb+') as dest:
+                for chunk in uploadedFile.chunks():
+                    dest.write(chunk)
+
+            # Delay processing so we can return a file soon
+            processUploadedDocument.delay(tmpFile.name, extension, newdoc.id)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
@@ -78,6 +64,42 @@ def _list(request):
     response = template.render(render_data, request)
 
     return HttpResponse(response)
+
+@app.task(name="processUploadedDocument")
+def processUploadedDocument(uploadedFilepath, extension, docId):
+    logger.info("Processing document: " + uploadedFilepath)
+    newdoc = get_object_or_404(Document, pk = docId)
+    hitCreator = HitCreator()
+
+    # Get the paths of each of the split fileparts
+    for (tmpFileObject, sampleRate) in splitAudioIntoParts(uploadedFilepath,
+            extension, basedir = settings.MEDIA_ROOT):
+        relPath = os.path.relpath(tmpFileObject, settings.MEDIA_ROOT)
+
+        # Open the file, copy into to the database's storage.
+        # TODO - inefficient copying - how can splitAudioIntoParts
+        # write directly into the correct location?
+        with open(tmpFileObject) as fileObj:
+            fileCopy = File(file=fileObj, name=relPath)
+
+            audioModel = AudioSnippet(audio = fileCopy,
+                                      hasBeenValidated = False,
+                                      predictions = [])
+
+            # Get the transcript
+            audioModel.save() # upload fileCopy
+            url = "gs://"+settings.GS_BUCKET_NAME+urlparse(audioModel.audio.url).path
+            text, confidence = getTranscriptionFromURL(url, sampleRate)
+            audioModel.predictions.append(text)
+            if float(confidence) > .99:
+                audioModel.hasBeenValidated = True
+
+            # Create a hit from this document
+            hitCreator.createHitFrom(audioModel, 'check')
+            newdoc.audioSnippets.add(audioModel) # this saves audioModel
+
+    newdoc.save()
+    os.remove(uploadedFilepath)
 
 def _deleteDocument(docToDel):
     for audioSnippet in docToDel.audioSnippets.all():

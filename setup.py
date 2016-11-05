@@ -35,6 +35,7 @@ setup(
     },
     scripts=[ ],
     install_requires=['django',
+                      'celery',
                       'enum34',
                       'gunicorn',
                       'whitenoise',
@@ -43,5 +44,6 @@ setup(
                       'dj-database-url',
                       'psycopg2',
                       'django-storages',
+                      'redis==2.10.3',
                       'google-api-python-client']
 )

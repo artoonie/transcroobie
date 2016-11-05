@@ -22,7 +22,7 @@ def getTranscriptionFromURL(url, sampleRate):
     transcript = ""
     confidence = 0
 
-    if response['results']:
+    if 'results' in response and response['results']:
         results = response['results'][0]
         if results['alternatives']:
             result = results['alternatives'][0]

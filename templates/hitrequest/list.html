@@ -14,8 +14,23 @@
                 {% csrf_token %}
                 <input type="hidden" name="selectedDoc" value="{{ document.pk }}" />
                 <input type="submit" value="[x]" />
-                <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+                <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a>
             </form>
+            </li>
+            {% for audiosnippet in document.audioSnippets.all %}
+            <div style="padding-left:30px">
+                {{forloop.counter}}:
+                {% if audiosnippet.isComplete %}
+                    ✔️
+                {% else %}
+                    ❌
+                {% endif %}
+                <a href="{{ audiosnippet.audio.url }}">{{ audiosnippet.audio.name }}</a>
+                <br/>
+                {{ audiosnippet.predictions }}
+                <br/> <br/>
+            </div>
+            {% endfor %}
         {% endfor %}
         </ul>
     {% else %}

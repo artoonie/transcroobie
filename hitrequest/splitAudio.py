@@ -8,14 +8,11 @@ def basenameNoExt(filename):
     """ e.g. /foo/bar/baz.txt returns baz """
     return os.path.splitext(os.path.basename(filename))[0]
 
-def splitAudioIntoParts(uploadedFile, basedir):
+def splitAudioIntoParts(uploadedFilepath, extension, basedir):
     """ Yields the filename of a namedTemporaryFile,
         which is deleted at the next iteration. """
-    uploadedFilepath = uploadedFile.temporary_file_path()
     assert os.path.exists(uploadedFilepath)
 
-    usersFilename = uploadedFile.name
-    _, extension = os.path.splitext(usersFilename)
     track = AudioSegment.from_file(uploadedFilepath, extension[1:])
     sampleRate = track.frame_rate
 

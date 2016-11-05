@@ -136,7 +136,16 @@ GS_BUCKET_NAME = os.environ['GS_BUCKET_NAME']
 
 DEFAULT_FILE_STORAGE = "storages.backends.gs.GSBotoStorage"
 #DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/tmp/'
 
 IS_DEV_ENV = str(os.environ.get('I_AM_IN_DEV_ENV')) != "0"
 USE_AMT_SANDBOX = str(os.environ.get('USE_AMT_SANDBOX')) != "0"
+
+# CELERY STUFF
+BROKER_URL = os.environ.get('REDIS_URL')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'US/Pacific'
