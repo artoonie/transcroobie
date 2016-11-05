@@ -1,2 +1,2 @@
 web: ./run.sh
-worker: celery -A transcroobie worker --loglevel=info
+worker: celery -A transcroobie worker --loglevel=info --concurrency=1
