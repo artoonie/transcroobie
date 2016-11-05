@@ -1,5 +1,4 @@
 import os
-import tempfile
 from urlparse import urlparse
 
 from boto.exception import GSResponseError
@@ -42,13 +41,8 @@ def _list(request):
             usersFilename = uploadedFile.name
             _, extension = os.path.splitext(usersFilename)
 
-            tmpFile = tempfile.NamedTemporaryFile(suffix=extension, delete=False)
-            with open(tmpFile.name, 'wb+') as dest:
-                for chunk in uploadedFile.chunks():
-                    dest.write(chunk)
-
             # Delay processing so we can return a file soon
-            processUploadedDocument.delay(tmpFile.name, extension, newdoc.id)
+            processUploadedDocument.delay(newdoc.id, extension)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
@@ -66,14 +60,25 @@ def _list(request):
     return HttpResponse(response)
 
 @app.task(name="processUploadedDocument")
-def processUploadedDocument(uploadedFilepath, extension, docId):
-    logger.info("Processing document: " + uploadedFilepath)
+def processUploadedDocument(docId, extension):
+    import tempfile
+
     newdoc = get_object_or_404(Document, pk = docId)
+    logger.info("Processing document: " + newdoc.docfile.url)
+
+
+    tmpFile = tempfile.NamedTemporaryFile(suffix=extension)
+    uploadedFile = newdoc.docfile
+    with open(tmpFile.name, 'wb+') as dest:
+        dest.write(uploadedFile.read())
+
     hitCreator = HitCreator()
 
     # Get the paths of each of the split fileparts
-    for (tmpFileObject, sampleRate) in splitAudioIntoParts(uploadedFilepath,
+    i = 0
+    for (tmpFileObject, sampleRate) in splitAudioIntoParts(tmpFile.name,
             extension, basedir = settings.MEDIA_ROOT):
+        logger.info("   Processing part {}".format(i))
         relPath = os.path.relpath(tmpFileObject, settings.MEDIA_ROOT)
 
         # Open the file, copy into to the database's storage.
@@ -97,9 +102,10 @@ def processUploadedDocument(uploadedFilepath, extension, docId):
             # Create a hit from this document
             hitCreator.createHitFrom(audioModel, 'check')
             newdoc.audioSnippets.add(audioModel) # this saves audioModel
+        logger.info("   Completed part  {}".format(i))
+        i += 1
 
     newdoc.save()
-    os.remove(uploadedFilepath)
 
 def _deleteDocument(docToDel):
     for audioSnippet in docToDel.audioSnippets.all():
