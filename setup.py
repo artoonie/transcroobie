@@ -44,6 +44,6 @@ setup(
                       'dj-database-url',
                       'psycopg2',
                       'django-storages',
-                      'redis',
+                      'redis==2.10.3',
                       'google-api-python-client']
 )
