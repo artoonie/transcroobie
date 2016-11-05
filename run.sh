@@ -4,7 +4,10 @@ set -e
 python manage.py makemigrations transcroobie
 python manage.py migrate --fake-initial
 
-redis-server &
+if [[ $IS_DEV_ENV=="0" ]]; then
+    # Not needed on heroku server
+    redis-server &
+fi
 celery -A transcroobie worker --loglevel=info &
 
 python manage.py runserver 0.0.0.0:$PORT
