@@ -43,8 +43,8 @@ setup(
                       'dj-database-url',
                       'psycopg2',
                       'django-storages',
-                      'celery=3.1.19',
-                      'kombu=3.0.32',
-                      'redis=2.10.5',
+                      'celery==3.1.19',
+                      'kombu==3.0.32',
+                      'redis==2.10.5',
                       'google-api-python-client']
 )
