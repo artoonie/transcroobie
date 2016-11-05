@@ -20,10 +20,12 @@
             {% for audiosnippet in document.audioSnippets.all %}
             <div style="padding-left:30px">
                 {{forloop.counter}}:
-                {% if audiosnippet.isComplete %}
+                {% if audiosnippet.hasBeenValidated %}
                     ✔️
-                {% else %}
+                {% elif audiosnippet.isComplete %}
                     ❌
+                {% else %}
+                    <a href='../../hit/checkHIT?docId={{audiosnippet.pk}}&assignmentId=ASSIGNMENT_ID_NOT_AVAILABLE&hitId={{audiosnippet.activeHITId}}'>🚀</a>
                 {% endif %}
                 <a href="{{ audiosnippet.audio.url }}">{{ audiosnippet.audio.name }}</a>
                 <br/>
