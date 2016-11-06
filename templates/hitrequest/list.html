@@ -143,7 +143,7 @@ tbody:hover > tr:hover td {
             </td>
             <td>
                 {% for prediction in audiosnippet.predictions %}
-                    Prediction #{{ forloop.counter }}: {{prediction}}
+                    <br/><strong>Prediction #{{ forloop.counter }}</strong>: {{prediction}}<br/>
                 {% endfor %}
             </td>
         </tr>
