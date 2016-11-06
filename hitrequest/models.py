@@ -35,3 +35,5 @@ class Document(models.Model):
     audioSnippets = models.ManyToManyField('hitrequest.AudioSnippet',
                                            related_name='docForSnippet')
 
+    completeTranscript = models.TextField(blank=True)
+

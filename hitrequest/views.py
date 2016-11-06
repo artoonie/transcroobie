@@ -47,6 +47,9 @@ def _list(request):
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
     else:
+        # Spawn a processHitTask every refresh
+        processHitsTask(doSpawn=False)
+
         form = DocumentForm() # A empty, unbound form
 
     # Load documents for the list page
@@ -106,16 +109,24 @@ def processUploadedDocument(docId, extension):
         i += 1
 
     newdoc.save()
+    processHitsTask.apply_async([True, 10],countdown=60) # wait a minute before processing
 
 def _deleteDocument(docToDel):
+    hitCreator = None
     for audioSnippet in docToDel.audioSnippets.all():
         audioSnippet.audio.delete()
+        if audioSnippet.activeHITId:
+            if not hitCreator:
+                # delay creation - I think this tries to connect to AMT on init
+                hitCreator = HitCreator()
+            hitCreator.deleteHit(audioSnippet.activeHITId)
         audioSnippet.delete()
     try:
         # The file may have been deleted remotely or not successfully uploaded
         docToDel.docfile.delete()
     except GSResponseError:
         pass
+
     docToDel.delete()
 
 def delete(request):
@@ -147,15 +158,37 @@ def deleteAllHits(request):
 
     return HttpResponseRedirect(reverse('list'))
 
-def processHits(request):
+@app.task(name="processHitsTask")
+def processHitsTask(doSpawn, spawnTimeout=None):
+    """ doSpawn: if there are unprocessed HITs, spawn more tasks?
+                 be careful not to recursively spawn a zillion jobs. """
+    docs = Document.objects.order_by('id')
     hitCreator = HitCreator()
-    text = hitCreator.processHits()
+    hasAnyHITCompleted = False
+    areAllHITsDone = True
+    for doc in docs:
+        if doc.completeTranscript:
+            continue
 
-    render_data = {'processedHitText': text}
-    template = loader.get_template('hitrequest/text.html')
-    response = template.render(render_data, request)
+        newHITCompleted = hitCreator.processHits(doc)
+        hasAnyHITCompleted |= newHITCompleted
 
-    return HttpResponse(response)
+        if doc.completeTranscript:
+            # Check again after processing
+            areAllHITsDone = False
+
+    if doSpawn and not areAllHITsDone:
+        assert spawnTimeout
+        # If a HIT completes, halve the countdown time.
+        # Else, double it.
+        nextCountdownMult = 2 if not hasAnyHITCompleted else 0.5
+        nextCountdown = spawnTimeout * nextCountdownMult
+        if spawnTimeout > 60 * 60 * 24: # one day
+            logger.info("Waiting {} seconds before looking for more HITs.".format(
+                    nextCountdown))
+            processHitsTask.apply_async([True, nextCountdown], countdown=spawnTimeout)
+        else:
+            logger.error("Waited a day and still no HITs ready")
 
 def approveAllHits(request):
     hitCreator = HitCreator()

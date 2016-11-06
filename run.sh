@@ -1,7 +1,7 @@
 set -e
 
 ./setupConfig.sh
-python manage.py makemigrations transcroobie
+python manage.py makemigrations
 python manage.py migrate --fake-initial
 
 if [[ $IS_DEV_ENV=="0" ]]; then

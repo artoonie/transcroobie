@@ -63,11 +63,14 @@ class HitCreator():
         audioSnippet.activeHITId = resultSet[0].HITId
         audioSnippet.save()
 
+    def deleteHit(self, hitID):
+        self.connection.disable_hit(hitID)
+
     def deleteAllHits(self):
         allHits = [hit for hit in self.connection.get_all_hits()]
         for hit in allHits:
             print "Disabling hit ", hit.HITId
-            self.connection.disable_hit(hit.HITId)
+            self.deleteHit(hit.HITId)
 
     def processHit(self, questionFormAnswers):
         # Process each HIT only once. This function will set activeHITId to ""
@@ -141,9 +144,13 @@ class HitCreator():
             completionStatus = CompletionStatus.givenup
         return completionStatus
 
-    def processHits(self):
-        audioSnippets = AudioSnippet.objects.order_by('id')
+    def processHits(self, doc):
+        """ Returns whether or not the doc had a newly-completed HIT
+            which was processed. """
+        assert not doc.completeTranscript
+        audioSnippets = doc.audioSnippets.order_by('id')
 
+        newHITCompleted = False
         assignments = []
         for audioSnippet in audioSnippets:
             hitID = audioSnippet.activeHITId
@@ -156,45 +163,19 @@ class HitCreator():
                     assignments.append(asgn)
                     questionFormAnswers = asgn.answers[0]
                     self.processHit(questionFormAnswers)
+                    newHITCompleted = True
 
         responses = [a.predictions[-1] for a in audioSnippets]
         eachString = '\n'.join(responses)
         statuses = [a.isComplete for a in audioSnippets]
-        if all([a.hasBeenValidated for s in statuses]):
-            # All tasks complete and validated
+        if all([a.hasBeenValidated for s in statuses]) or \
+                all([a.isComplete for a in audioSnippets]):
+            # All tasks complete for first time
             totalString = overlap.combineSeveral(responses)
+            doc.completeTranscript = totalString
+            doc.save()
 
-            res = "Correct transcript:\n" + totalString
-            res += "\n\n\nEach:\n" + eachString
-            return res
-        elif all([a.isComplete for a in audioSnippets]):
-            # All tasks complete, but some may not be validated
-            totalString = overlap.combineSeveral(responses)
-            res = "Potentially incorrect transcript. Our best guess is:\n"
-            res += totalString
-            res += "\n\n Unverified strings marked with (*):\n"
-            for i, s in enumerate(audioSnippet):
-                if not a.hasBeenValidated:
-                    res += "* "
-                else:
-                    res += "  "
-                res += s + "\n"
-            return res
-        else:
-            # Not all tasks complete yet.
-            res = "Some AMT tasks still pending. HIT status: \n"
-            for a in audioSnippets:
-                if a.isComplete:
-                    if a.hasBeenValidated:
-                        res += "\n COMPLETE: "
-                    else:
-                        res += "\n GIVEN UP: "
-                else:
-                    assert a.activeHITId
-                    res += "\n PENDING ({}): ".format(a.activeHITId)
-                res += a.predictions[-1]
-
-            return res
+        return newHITCompleted
 
     def isTaskReady(self, hitID):
         return len(self.connection.get_assignments(hitID)) > 0

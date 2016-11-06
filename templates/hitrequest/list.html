@@ -122,7 +122,11 @@ tbody:hover > tr:hover td {
                 <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a>
             </th>
             <th>
-                Prediction
+                {% if audioSnippets.completeTranscript %}
+                {{ audioSnippets.completeTranscript }}
+                {% else %}
+                Pending Prediction
+                {% endif %}
             </th>
         </tr>
     </thead>
@@ -143,7 +147,9 @@ tbody:hover > tr:hover td {
             </td>
             <td>
                 {% for prediction in audiosnippet.predictions %}
-                    <br/><strong>Prediction #{{ forloop.counter }}</strong>: {{prediction}}<br/>
+                    <br/><strong>Prediction #{{ forloop.counter }}</strong>:
+                    {{prediction}}
+                    <br/>
                 {% endfor %}
             </td>
         </tr>
@@ -174,11 +180,6 @@ tbody:hover > tr:hover td {
 
         <table width=400><thead><tr><th style="text-align:center">
         <h2> Extra controls </h2>
-        <form action="{% url 'processHits' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="submit" value="Process completed AMT HITs" />
-        </form>
-
         <form action="{% url 'approveAllHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Approve completed AMT HITs" />
