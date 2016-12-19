@@ -24,10 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['transcroobie.herokuapp.com']
 
 
 # Application definition
@@ -140,6 +137,9 @@ MEDIA_ROOT = '/tmp/'
 
 IS_DEV_ENV = str(os.environ.get('I_AM_IN_DEV_ENV')) != "0"
 USE_AMT_SANDBOX = str(os.environ.get('USE_AMT_SANDBOX')) != "0"
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = IS_DEV_ENV
 
 # Celery
 BROKER_URL = os.environ.get('REDIS_URL')
