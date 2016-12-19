@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'hit',
     'hitrequest',
     'storages',
+    'social.apps.django_app.default',
 ]
 
 MIDDLEWARE = [
@@ -142,10 +143,29 @@ MEDIA_ROOT = '/tmp/'
 IS_DEV_ENV = str(os.environ.get('I_AM_IN_DEV_ENV')) != "0"
 USE_AMT_SANDBOX = str(os.environ.get('USE_AMT_SANDBOX')) != "0"
 
-# CELERY STUFF
+# Celery
 BROKER_URL = os.environ.get('REDIS_URL')
 CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'US/Pacific'
+
+# Google oauth
+AUTHENTICATION_BACKENDS = (
+    #'social.backends.open_id.OpenIdAuth',
+    #'social.backends.google.GoogleOpenId',
+    'social.backends.google.GoogleOAuth2',
+    #'social.backends.google.GoogleOAuth',
+    #'social.backends.twitter.TwitterOAuth',
+    #'social.backends.yahoo.YahooOpenId',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+LOGIN_REDIRECT_URL = '/hitrequest/list'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ['SOCIAL_AUTH_GOOGLE_OAUTH2_KEY']
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ['SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET']
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['avametric.com'] # for safety, for now
+SOCIAL_AUTH_USER_MODEL = 'auth.User'
