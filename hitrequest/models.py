@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 
 class AudioSnippet(models.Model):
     audio = models.FileField(upload_to='audioparts/%Y-%m-%d')
@@ -37,3 +36,4 @@ class Document(models.Model):
                                            related_name='docForSnippet')
 
     completeTranscript = models.TextField(blank=True)
+

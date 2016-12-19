@@ -46,6 +46,5 @@ setup(
                       'celery==3.1.19',
                       'kombu==3.0.32',
                       'redis==2.10.5',
-                      'python-social-auth==0.2.1',
                       'google-api-python-client']
 )

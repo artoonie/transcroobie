@@ -12,7 +12,6 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.contrib.auth.decorators import login_required
 
 from hitrequest.models import Document, AudioSnippet
 from hitrequest.forms import DocumentForm
@@ -23,7 +22,6 @@ from transcroobie.celery import app
 
 logger = get_task_logger(__name__)
 
-@login_required
 @csrf_exempt
 def list(request):
     # Handle file upload
@@ -50,7 +48,7 @@ def _list(request):
             return HttpResponseRedirect(reverse('list'))
     else:
         # Spawn a processHitTask every refresh
-        _processHitsTask(doSpawn=False)
+        processHitsTask(doSpawn=False)
 
         form = DocumentForm() # A empty, unbound form
 
@@ -64,7 +62,6 @@ def _list(request):
 
     return HttpResponse(response)
 
-@login_required
 @app.task(name="processUploadedDocument")
 def processUploadedDocument(docId, extension):
     import tempfile
@@ -112,7 +109,7 @@ def processUploadedDocument(docId, extension):
         i += 1
 
     newdoc.save()
-    _processHitsTask.apply_async([True, 10],countdown=60) # wait a minute before processing
+    processHitsTask.apply_async([True, 10],countdown=60) # wait a minute before processing
 
 def _deleteDocument(docToDel):
     hitCreator = None
@@ -132,7 +129,6 @@ def _deleteDocument(docToDel):
 
     docToDel.delete()
 
-@login_required
 def delete(request):
     """ Delete one uploaded file """
     if request.method != 'POST':
@@ -144,7 +140,6 @@ def delete(request):
 
     return HttpResponseRedirect(reverse('list'))
 
-@login_required
 def deleteAll(request):
     """ Delete all uploaded files """
     documents = Document.objects.all()
@@ -157,15 +152,14 @@ def deleteAll(request):
 
     return HttpResponseRedirect(reverse('list'))
 
-@login_required
 def deleteAllHits(request):
     hitCreator = HitCreator()
     hitCreator.deleteAllHits()
 
     return HttpResponseRedirect(reverse('list'))
 
-@app.task(name="_processHitsTask")
-def _processHitsTask(doSpawn, spawnTimeout=None):
+@app.task(name="processHitsTask")
+def processHitsTask(doSpawn, spawnTimeout=None):
     """ doSpawn: if there are unprocessed HITs, spawn more tasks?
                  be careful not to recursively spawn a zillion jobs. """
     docs = Document.objects.order_by('id')
@@ -192,11 +186,10 @@ def _processHitsTask(doSpawn, spawnTimeout=None):
         if spawnTimeout > 60 * 60 * 24: # one day
             logger.info("Waiting {} seconds before looking for more HITs.".format(
                     nextCountdown))
-            _processHitsTask.apply_async([True, nextCountdown], countdown=spawnTimeout)
+            processHitsTask.apply_async([True, nextCountdown], countdown=spawnTimeout)
         else:
             logger.error("Waited a day and still no HITs ready")
 
-@login_required
 def approveAllHits(request):
     hitCreator = HitCreator()
     hitCreator.approveAllHits()

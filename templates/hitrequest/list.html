@@ -4,8 +4,84 @@
         <meta charset="utf-8">
         <title>Upload files to transcribe</title>
     </head>
-{% load static %}
-<link rel="stylesheet" href="{% static "style.css" %}"/>
+<!-- Table style, from http://codepen.io/anon/pen/NbPbNV -->
+<style>
+* { 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box; 
+	box-sizing: border-box; 
+}
+
+body {
+  background:#353a40;
+  color:#F0F0F0;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 17pt;
+}
+
+table {
+  border-collapse: separate;
+  background:#fff;
+  @include border-radius(5px);
+  margin:50px auto;
+  @include box-shadow(0px 0px 5px rgba(0,0,0,0.3));
+}
+
+thead {
+  @include border-radius(5px);
+}
+
+thead th, thead a {
+  font-size:16px;
+  font-weight:400;
+  color:#fff;
+}
+thead th {
+  @include text-shadow(1px 1px 0px rgba(0,0,0,0.5));
+  text-align:left;
+  padding:20px;
+  background:linear-gradient(#646f7f, #4a5564);
+  border-top:1px solid #858d99;
+}
+
+tbody tr td {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:400;
+  color:#5f6062;
+  font-size:13px;
+  padding:20px 20px 20px 20px;
+  border-bottom:1px solid #e0e0e0;
+  
+}
+
+tbody tr:nth-child(2n) {
+  background:#f0f3f5;
+}
+
+tbody tr:last-child td {
+  border-bottom:none;
+  &:first-child {
+    @include border-bottom-left-radius(5px);
+  }
+  &:last-child {
+    @include border-bottom-right-radius(5px);
+  }
+}
+
+tbody:hover > tr td {
+  @include opacity(0.5);
+  
+  /* uncomment for blur effect */
+  /* color:transparent;
+  @include text-shadow(0px 0px 2px rgba(0,0,0,0.8));*/
+}
+
+tbody:hover > tr:hover td {
+  @include text-shadow(none);
+  color:#2d2d2d;
+  @include opacity(1.0);
+}
+</style>
 
 <!-- Upload button, from http://maffrigby.com/nice-file-upload-button-dude/ -->
 <style>
@@ -28,8 +104,6 @@
 </style>
     <body>
     <h1>Transcroobie</h1>
-    <h4>¡{{ user.username }}! <a href="../../logout" name="white">(logout?)</a></h4>
-
     <!-- List of uploaded documents -->
     {% if documents %}
         <ul>
@@ -38,7 +112,7 @@
     <thead>
         <tr>
             <th>
-            <form action="{% url 'hitrequest:delete' %}" method="post" enctype="multipart/form-data">
+            <form action="{% url 'delete' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="selectedDoc" value="{{ document.pk }}" />
                 <input type="submit" value="[x]" />
@@ -91,7 +165,7 @@
         <!-- Upload form. Note enctype attribute! -->
         <table width=400><thead><tr><th>
         <h2> Upload a new audio file </h2>
-        <form action="{% url 'hitrequest:list' %}" method="post" enctype="multipart/form-data" class="fileUpload">
+        <form action="{% url 'list' %}" method="post" enctype="multipart/form-data" class="fileUpload">
             {% csrf_token %}
             <p>{{ form.non_field_errors }}</p>
             <p>{{ form.uploadedFile.label_tag }} {{ form.uploadedFile.help_text }}</p>
@@ -106,15 +180,15 @@
 
         <table width=400><thead><tr><th style="text-align:center">
         <h2> Extra controls </h2>
-        <form action="{% url 'hitrequest:approveAllHits' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'approveAllHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Approve completed AMT HITs" />
         </form>
-        <form action="{% url 'hitrequest:deleteAllHits' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'deleteAllHits' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Delete all AMT HITs" />
         </form>
-        <form action="{% url 'hitrequest:deleteAll' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'deleteAll' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="submit" value="Delete all files" />
         </form>
