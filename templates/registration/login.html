@@ -1,0 +1,13 @@
+{% load static %}
+<link rel="stylesheet" href="{% static "style.css" %}"/>
+{% block content %}
+  <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+  <br>
+  <p><strong>-- OR --</strong></p>
+  <a name="white" href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a> (only @avametric emails allowed - contact Armin if you would like access.)<br>
+{% endblock %}
