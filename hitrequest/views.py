@@ -44,7 +44,7 @@ def _list(request):
             _, extension = os.path.splitext(usersFilename)
 
             # Delay processing so we can return a file soon
-            processUploadedDocument.delay(newdoc.id, extension)
+            _processUploadedDocument.delay(newdoc.id, extension)
 
             # Redirect to the document list after POST
             return HttpResponseRedirect(reverse('list'))
@@ -64,9 +64,8 @@ def _list(request):
 
     return HttpResponse(response)
 
-@login_required
-@app.task(name="processUploadedDocument")
-def processUploadedDocument(docId, extension):
+@app.task(name="_processUploadedDocument")
+def _processUploadedDocument(docId, extension):
     import tempfile
 
     newdoc = get_object_or_404(Document, pk = docId)

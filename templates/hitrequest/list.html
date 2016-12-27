@@ -48,8 +48,8 @@
                 <a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a>
             </th>
             <th>
-                {% if audioSnippets.completeTranscript %}
-                {{ audioSnippets.completeTranscript }}
+                {% if document.completeTranscript %}
+                {{ document.completeTranscript }}
                 {% else %}
                 Pending Prediction
                 {% endif %}
