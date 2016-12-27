@@ -11,11 +11,11 @@ This prediction is forwarded to AMT to find any mistakes, and the fix/verify ite
 The final prediction combines each of the snippets, taking account the overlapping region.
 
 ## Key files
-[hitrequest/views.py](hitrequest/views.py)): The main controller for uploading audio and spawning/managing jobs.
+[hitrequest/views.py](hitrequest/views.py): The main controller for uploading audio and spawning/managing jobs.
 
-[hitrequest/createHits.py](hitrequest/creatHits.py)): Creating, managing, and processing results from AMT HITs.
+[hitrequest/createHits.py](hitrequest/creatHits.py): Creating, managing, and processing results from AMT HITs.
 
-[hitrequest/overlap.py](hitrequest/overlap.py)): The algorithm for combining overlapping audio transcription (a simple optimization to find the maxima of the convex function).
+[hitrequest/overlap.py](hitrequest/overlap.py): The algorithm for combining overlapping audio transcription (a simple optimization to find the maxima of the convex function).
 
 ## Security
 For security, only the authors have access to login.
