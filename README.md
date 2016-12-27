@@ -11,11 +11,11 @@ This prediction is forwarded to AMT to find any mistakes, and the fix/verify ite
 The final prediction combines each of the snippets, taking account the overlapping region.
 
 ## Key files
-[[hitrequest/views.py]](hitrequest/views.py)): The main controller for uploading audio and spawning/managing jobs.
+[hitrequest/views.py](hitrequest/views.py)): The main controller for uploading audio and spawning/managing jobs.
 
-[[hitrequest/createHits.py]](hitrequest/creatHits.py)): Creating, managing, and processing results from AMT HITs.
+[hitrequest/createHits.py](hitrequest/creatHits.py)): Creating, managing, and processing results from AMT HITs.
 
-[[hitrequest/overlap.py]](hitrequest/overlap.py)): The algorithm for combining overlapping audio transcription (a simple optimization to find the maxima of the convex function).
+[hitrequest/overlap.py](hitrequest/overlap.py)): The algorithm for combining overlapping audio transcription (a simple optimization to find the maxima of the convex function).
 
 ## Security
 For security, only the authors have access to login.
@@ -28,25 +28,25 @@ For security, only the authors have access to login.
 ## Getting started
 Create a .env file with the following keys:
 ```
-AWS_ACCESS_KEY_ID=""
-AWS_SECRET_ACCESS_KEY=""
-AWS_STORAGE_BUCKET_NAME=""
-AWS_S3_HOST=""
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+export AWS_STORAGE_BUCKET_NAME=""
+export AWS_S3_HOST=""
 
-DJANGO_SECRET_KEY=""
-DATABASE_URL=""
+export DJANGO_SECRET_KEY=""
+export DATABASE_URL=""
 
-I_AM_IN_DEV_ENV=""
-USE_AMT_SANDBOX=""
+export I_AM_IN_DEV_ENV=""
+export USE_AMT_SANDBOX=""
 
-GS_ACCESS_KEY_ID=""
-GS_SECRET_ACCESS_KEY=""
-GS_BUCKET_NAME=""
+export GS_ACCESS_KEY_ID=""
+export GS_SECRET_ACCESS_KEY=""
+export GS_BUCKET_NAME=""
 
-REDIS_URL=""
+export REDIS_URL=""
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=""
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=""
+export SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=""
+export SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=""
 ```
 (and create all relevant accounts)
 
