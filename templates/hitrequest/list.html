@@ -91,7 +91,7 @@
         <!-- Upload form. Note enctype attribute! -->
         <table width=400><thead><tr><th>
         <h2> Upload a new audio file </h2>
-        <form action="{% url 'hitrequest:list' %}" method="post" enctype="multipart/form-data" class="fileUpload">
+        <form action="{% url 'hitrequest:index' %}" method="post" enctype="multipart/form-data" class="fileUpload">
             {% csrf_token %}
             <p>{{ form.non_field_errors }}</p>
             <p>{{ form.uploadedFile.label_tag }} {{ form.uploadedFile.help_text }}</p>

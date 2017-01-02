@@ -17,6 +17,8 @@ The final prediction combines each of the snippets, taking account the overlappi
 
 [hitrequest/overlap.py](hitrequest/overlap.py): The algorithm for combining overlapping audio transcription (a simple optimization to find the maxima of the convex function).
 
+[hitrequest/splitAudio.py](hitrequest/splitAudio.py): Split the audio into chunks. Eventually, this is where we should add the silence/word detection, diarization, and non-speech removal.
+
 ## Security
 For security, only the authors have access to login.
 

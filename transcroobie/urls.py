@@ -9,7 +9,7 @@ from django.views.generic import RedirectView
 urlpatterns = [
     url(r'^hit/', include('hit.urls')),
     url(r'^hitrequest/', include('hitrequest.urls', namespace='hitrequest')),
-    url(r'^$', RedirectView.as_view(pattern_name='hitrequest:list', permanent=True)),
+    url(r'^$', RedirectView.as_view(pattern_name='hitrequest:index', permanent=True)),
     url(r'^admin/', admin.site.urls),
     url(r'^oauth/', include('social.apps.django_app.urls', namespace='social')),
     url(r'^login', auth_views.login, name='login'),

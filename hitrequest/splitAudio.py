@@ -17,16 +17,15 @@ def splitAudioIntoParts(uploadedFilepath, extension, basedir):
     sampleRate = track.frame_rate
 
     tracklen = len(track)
-    two_seconds = 2*1000
-    ten_seconds = 10*1000
-    num_segments = int(math.ceil(tracklen / ten_seconds))
+    overlap = 2*1000 # 2 seconds
+    chunkBaseLength = 30*1000 # 30 seconds
+    num_segments = int(math.ceil(tracklen / chunkBaseLength))
     basename = basenameNoExt(uploadedFilepath)
 
-    # Iterate over every ten-second segment
-    overlap = two_seconds
+    # Iterate over every chunkBaseLength segment
     for i in range(0, num_segments):
-        start_time = i*ten_seconds
-        end_time = min((i+1)*ten_seconds+overlap, tracklen)
+        start_time = i*chunkBaseLength
+        end_time = min((i+1)*chunkBaseLength+overlap, tracklen)
         curr_track = track[start_time:end_time]
 
         # Save the segment to a NamedTemporaryFile in basedir,

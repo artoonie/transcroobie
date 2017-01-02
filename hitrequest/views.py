@@ -7,7 +7,6 @@ from django.template import loader
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.core.files.base import File
-from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -23,9 +22,9 @@ from transcroobie.celery import app
 
 logger = get_task_logger(__name__)
 
-@login_required
 @csrf_exempt
-def list(request):
+@login_required
+def index(request):
     # Handle file upload
     request.upload_handlers.pop(0)
     return _list(request)
@@ -47,7 +46,7 @@ def _list(request):
             _processUploadedDocument.delay(newdoc.id, extension)
 
             # Redirect to the document list after POST
-            return HttpResponseRedirect(reverse('list'))
+            return redirectToIndex()
     else:
         # Spawn a processHitTask every refresh
         _processHitsTask(doSpawn=False)
@@ -141,7 +140,7 @@ def delete(request):
     docToDel = get_object_or_404(Document, pk = docId)
     _deleteDocument(docToDel)
 
-    return HttpResponseRedirect(reverse('list'))
+    return redirectToIndex()
 
 @login_required
 def deleteAll(request):
@@ -154,14 +153,14 @@ def deleteAll(request):
     for audioSnippet in audioSnippets:
         audioSnippets.delete()
 
-    return HttpResponseRedirect(reverse('list'))
+    return redirectToIndex()
 
 @login_required
 def deleteAllHits(request):
     hitCreator = HitCreator()
     hitCreator.deleteAllHits()
 
-    return HttpResponseRedirect(reverse('list'))
+    return redirectToIndex()
 
 @app.task(name="_processHitsTask")
 def _processHitsTask(doSpawn, spawnTimeout=None):
@@ -200,4 +199,7 @@ def approveAllHits(request):
     hitCreator = HitCreator()
     hitCreator.approveAllHits()
 
-    return HttpResponseRedirect(reverse('list'))
+    return redirectToIndex()
+
+def redirectToIndex():
+    return HttpResponseRedirect('../index')
