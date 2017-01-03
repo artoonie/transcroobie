@@ -1,3 +1,5 @@
+from itertools import groupby
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
@@ -50,16 +52,19 @@ def fixHIT(request):
     renderData = getRenderDataFor(request)
     template= loader.get_template('hit/fixHIT.html')
     audioSnippet = renderData['audioSnippet']
-    incorrectWords = audioSnippet.incorrectWords['bools'][-1]
 
-    txt = ""
-    for i, t in enumerate(renderData['lastTranscription']):
-        if incorrectWords[i]:
-            txt += "WRONG" + t + "\n"
-        else:
-            txt += "RIGHT" + t + "\n"
-    lt = renderData['lastTranscription']
-    renderData['lastTranscription'] = zip(lt, incorrectWords)
+    correctStatus = audioSnippet.incorrectWords['bools'][-1]
+    transcript = renderData['lastTranscription']
+
+    # Combine consecutive duplicates
+    combinedTranscript = []
+    combinedStatus = []
+    for group in groupby(zip(transcript, correctStatus),
+            lambda f: f[1]): # lambda to sort by the bools in correctStatus
+        combinedStatus.append(group[0])
+        combinedTranscript.append(" ".join([tuple[0] for tuple in group[1]]))
+
+    renderData['lastTranscription'] = zip(combinedTranscript, combinedStatus)
 
     response = template.render(renderData, request)
 

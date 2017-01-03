@@ -78,9 +78,6 @@ audio
 .wordUnselected a:link, .wordUnselected a:visited {
     background-color:#00AA00;
 }
-.wordUnselected:hover {
-    background-color:#5cbf2a;
-}
 .wordUnselected:active {
     position:relative;
     top:1px;
@@ -125,10 +122,13 @@ audio
 </script>
 
 <h1>Find errors in the transcript</h1>
+<h2>Click on the errors to flag them as <span class="wordSelected">incorrect</span>.</h3>
 <h2>Select all words that do not match the audio clip</h2>
-<h2>Ignore words cut off at the beginning or end of the cilp.</h2>
-<h2>If there are missing words at the beginning or end, mark the ellipses (...) red.</h2>
-<h2>All incorrect words should be marked red.</h4>
+<ul>
+<li>Ignore words that have been cut off at the beginning or end of the cilp.</li>
+<li>If there are missing words (that are not cut in half) at the beginning or end, mark the ellipses (...) red.</li>
+<li>If there is missing punctuation, or a missing new speaker indicator, select the bubble between words.</li>
+</ul>
 
 <audio controls>
   <source src="{{ audioSnippet.audio.url }}" type="audio/mpeg">
@@ -140,6 +140,7 @@ Your browser does not support the audio element.
 <div id="transcriptionText">
 {% for word in lastTranscription %}
     <span id="word_{{forloop.counter0}}" class="wordUnselected" onclick="toggleClass(this)"><a href="#">{{ word }}</a></span>
+    <span id="punctiation_{{forloop.counter0}}" class="wordUnselected" onclick="toggleClass(this)"><a href="#"> </a></span>
 {% endfor %}
 </div>
 
@@ -150,6 +151,7 @@ Your browser does not support the audio element.
     <input type="hidden" id="asFileId" name="asFileId" value="{{ as_file_id }}">
     <input type="hidden" id="workerId" name="workerId" value="{{ worker_id }}"/>
     <input type="hidden" id="hitId" name="hitId" value="{{ hit_id }}" />
+    <p/>
     <input class="submitButton" type="submit" {{isDisabled}} />
 </form>
 <div>
