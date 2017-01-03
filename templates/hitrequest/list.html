@@ -64,8 +64,10 @@
                     ✔️
                 {% elif audiosnippet.isComplete %}
                     ❌
+                {% elif audiosnippet.predictions|length == audiosnippet.incorrectWords.bools|length%}
+                    <a href='../../hit/fixHIT?docId={{audiosnippet.pk}}&assignmentId=ASSIGNMENT_ID_NOT_AVAILABLE&hitId={{audiosnippet.activeHITId}}'>🔨</a>
                 {% else %}
-                    <a href='../../hit/checkHIT?docId={{audiosnippet.pk}}&assignmentId=ASSIGNMENT_ID_NOT_AVAILABLE&hitId={{audiosnippet.activeHITId}}'>🚀</a>
+                    <a href='../../hit/checkHIT?docId={{audiosnippet.pk}}&assignmentId=ASSIGNMENT_ID_NOT_AVAILABLE&hitId={{audiosnippet.activeHITId}}'>🏷</a>
                 {% endif %}
             </td>
             <td>
@@ -77,6 +79,10 @@
                     {{prediction}}
                     <br/>
                 {% endfor %}
+                <p />
+                {% if audiosnippet.activeHITId %}
+                <strong>Active HIT ID:</strong> {{ audiosnippet.activeHITId }}
+                {% endif %}
             </td>
         </tr>
             {% endfor %}
