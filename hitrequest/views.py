@@ -46,7 +46,7 @@ def _list(request):
             _processUploadedDocument.delay(newdoc.id, extension)
 
             # Redirect to the document list after POST
-            return redirectToIndex()
+            return HttpResponseRedirect('index.html')
     else:
         # Spawn a processHitTask every refresh
         _processHitsTask(doSpawn=False)
@@ -202,4 +202,4 @@ def approveAllHits(request):
     return redirectToIndex()
 
 def redirectToIndex():
-    return HttpResponseRedirect('../index')
+    return HttpResponseRedirect('../index.html')

@@ -1,7 +1,7 @@
 from enum import IntEnum
 
-from boto.mturk.connection import MTurkConnection
 from boto.mturk.connection import MTurkRequestError
+from boto.mturk.connection import MTurkConnection
 from boto.mturk.question import ExternalQuestion
 from boto.mturk.price import Price
 from django.shortcuts import get_object_or_404
@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404
 from . import overlap
 from hitrequest.models import AudioSnippet
 from transcroobie import settings
+from hit.transcriptProcessUtils import transcriptWithSpacesAndEllipses,\
+                                       combineConsecutiveDuplicates
 
 class CompletionStatus(IntEnum):
     incomplete = 0,
@@ -27,11 +29,15 @@ class HitCreator():
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 host=HOST)
 
-    def createHitFrom(self, audioSnippet, hitType):
+    def createHitFrom(self, audioSnippet, hitType, numIncorrectWords=None):
         if hitType == "fix":
             suffix = "fixHIT"
+            # half cent per incorrect word, up to eight words
+            assert isinstance(numIncorrectWords, int)
+            amount = max(min(.04, numIncorrectWords*.005), .01)
         elif hitType == "check":
             suffix = "checkHIT"
+            amount = 0.02
         else:
             assert False
 
@@ -45,7 +51,6 @@ class HitCreator():
                       " transcribing these words."
         keywords = ["transcription"]
         frame_height = 800
-        amount = 0.05
 
         thisDocUrl = baseurl + "?docId=" + str(audioSnippet.pk)
         questionform = ExternalQuestion(thisDocUrl, frame_height)
@@ -64,7 +69,10 @@ class HitCreator():
         audioSnippet.save()
 
     def deleteHit(self, hitID):
-        self.connection.disable_hit(hitID)
+        try:
+            self.connection.disable_hit(hitID)
+        except MTurkRequestError as e:
+            print "HIT already deleted", e
 
     def deleteAllHits(self):
         allHits = [hit for hit in self.connection.get_all_hits()]
@@ -93,20 +101,36 @@ class HitCreator():
                 responseStr = questionFormAnswer.fields[0]
                 response = [val == 'true' for val in responseStr.split(',')]
 
+        numIncorrectWords = 0
         if hitType == "fix":
+            # Get the list of words marked incorrect, and count them
             incorrectWords = audioSnippet.incorrectWords['bools'][-1]
+            numIncorrectWords = len(incorrectWords)-sum(incorrectWords)
+
+            # Get the last prediction to interpret incorrectWords
             prediction = audioSnippet.predictions[-1].split()
+
+            # Convert the last prediction to what was actually sent to
+            # the user
+            predictionSpaced = transcriptWithSpacesAndEllipses(prediction)
+            assert len(incorrectWords) == len(predictionSpaced)
+            words, isCorrect = combineConsecutiveDuplicates(predictionSpaced,
+                    incorrectWords)
+
             response = ""
-            assert len(incorrectWords) == len(prediction) + 2
-            for i in xrange(len(prediction) + 2): # + 2 for ellipses at start/end
-                if not incorrectWords[i]:
+            for i in xrange(len(words)):
+                if not isCorrect[i]:
                     response += fixWords["word_" + str(i)] + " "
                 else:
-                    # if not in this range, we are looking at the ellipses
-                    # at the start/end, which we only want to add if they've
-                    # been marked incorrect
-                    if i > 0 and i <= len(prediction):
-                        response += prediction[i-1] + " "
+                    # Only add punctuation (" ") and ellipses if marked incorrect
+                    word = words[i]
+                    if word.isspace() or word == "":
+                        continue
+                    elif i == 0 and word.startswith("..."):
+                        word = word[3:] # remove initial ellipses
+                    elif i == len(words)-1 and word.endswith("..."):
+                        word = word[:-3] # remove trailing ellipses
+                    response += word.strip() + " "
             audioSnippet.predictions.append(response)
 
             # Always do a check after a fix
@@ -125,7 +149,7 @@ class HitCreator():
         if completionStatus == CompletionStatus.incomplete:
             if hitType == "check":
                 # CHECK task complete. Create a FIX task (since not # hasBeenValidated)
-                self.createHitFrom(audioSnippet, 'fix')
+                self.createHitFrom(audioSnippet, 'fix', numIncorrectWords)
             elif hitType == "fix":
                 # FIX task complete. Create a CHECK task.
                 self.createHitFrom(audioSnippet, 'check')
@@ -166,7 +190,6 @@ class HitCreator():
                     newHITCompleted = True
 
         responses = [a.predictions[-1] for a in audioSnippets]
-        eachString = '\n'.join(responses)
         statuses = [a.isComplete for a in audioSnippets]
         if all([a.hasBeenValidated for s in statuses]) or \
                 all([a.isComplete for a in audioSnippets]):

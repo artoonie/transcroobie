@@ -1,12 +1,11 @@
-from itertools import groupby
-
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.views.decorators.clickjacking import xframe_options_exempt
 from hitrequest.models import AudioSnippet
 from transcroobie import settings
-
+from hit.transcriptProcessUtils import transcriptWithSpacesAndEllipses,\
+                                       combineConsecutiveDuplicates
 
 if settings.IS_DEV_ENV or settings.USE_AMT_SANDBOX:
     AMAZON_HOST = "https://workersandbox.mturk.com/mturk/externalSubmit"
@@ -30,9 +29,7 @@ def getRenderDataFor(request):
     else:
         lastTranscription = ""
 
-    withEllipses = ["..."]
-    withEllipses.extend(lastTranscription)
-    withEllipses.append("...")
+    withEllipses = transcriptWithSpacesAndEllipses(lastTranscription)
 
     renderData = {
         "worker_id": request.GET.get("workerId", ""),
@@ -55,14 +52,11 @@ def fixHIT(request):
 
     correctStatus = audioSnippet.incorrectWords['bools'][-1]
     transcript = renderData['lastTranscription']
+    assert len(transcript) == len(correctStatus)
 
     # Combine consecutive duplicates
-    combinedTranscript = []
-    combinedStatus = []
-    for group in groupby(zip(transcript, correctStatus),
-            lambda f: f[1]): # lambda to sort by the bools in correctStatus
-        combinedStatus.append(group[0])
-        combinedTranscript.append(" ".join([tuple[0] for tuple in group[1]]))
+    combinedTranscript, combinedStatus = combineConsecutiveDuplicates(
+            transcript, correctStatus)
 
     renderData['lastTranscription'] = zip(combinedTranscript, combinedStatus)
 
