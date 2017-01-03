@@ -99,12 +99,22 @@ audio
           e.className = "wordUnselected";
        else
           e.className = "wordSelected";
-        prepareResult()
+        prepareResults()
     }
-    function prepareResult() {
+    function prepareResults() {
+        words = prepareResult("word_")
+
         var res = new Array(numWords);
         for (i = 0; i < numWords; i++) { 
-            var elem = document.getElementById('word_'+i);
+            res[i] = words[i]
+        }
+
+        document.getElementById("checkHITResult").value = res;
+    }
+    function prepareResult(prefix) {
+        var res = new Array(numWords);
+        for (i = 0; i < numWords; i++) { 
+            var elem = document.getElementById(prefix+i);
             var elemClass = elem.className;
             if (elemClass == "wordSelected") {
                 res[i] = false;
@@ -114,10 +124,10 @@ audio
                 res[i] = "ERROR";
             }
         }
-        document.getElementById("checkHITResult").value = res;
+        return res
     }
     window.onload = function(){
-        prepareResult()
+        prepareResults()
     }
 </script>
 
@@ -140,7 +150,6 @@ Your browser does not support the audio element.
 <div id="transcriptionText">
 {% for word in lastTranscription %}
     <span id="word_{{forloop.counter0}}" class="wordUnselected" onclick="toggleClass(this)"><a href="#">{{ word }}</a></span>
-    <span id="punctiation_{{forloop.counter0}}" class="wordUnselected" onclick="toggleClass(this)"><a href="#"> </a></span>
 {% endfor %}
 </div>
 
