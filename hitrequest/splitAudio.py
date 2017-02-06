@@ -18,7 +18,7 @@ def splitAudioIntoParts(uploadedFilepath, extension, basedir):
 
     tracklen = len(track)
     overlap = 2*1000 # 2 seconds
-    chunkBaseLength = 30*1000 # 30 seconds
+    chunkBaseLength = 10*1000 # 10 seconds
     num_segments = int(math.ceil(tracklen / chunkBaseLength))
     basename = basenameNoExt(uploadedFilepath)
 
@@ -37,4 +37,3 @@ def splitAudioIntoParts(uploadedFilepath, extension, basedir):
                 dir = basedir) as currFilename:
             curr_track.export(currFilename.name, format="wav", bitrate="192k")
             yield (currFilename.name, sampleRate)
-            return
