@@ -65,7 +65,6 @@ def _list(request):
 
 @app.task(name="_processUploadedDocument")
 def _processUploadedDocument(docId, extension):
-    assert False
     import tempfile
 
     newdoc = get_object_or_404(Document, pk = docId)
