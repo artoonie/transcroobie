@@ -212,7 +212,7 @@ class HitCreator():
                 self.connection.approve_assignment(assignment.AssignmentId)
             except MTurkRequestError as e:
                 # Maybe already approved?
-                logger.error("MTurk Request Error: " + e.msg)
+                logger.error("MTurk Request Error: " + str(e))
 
     def checkIfHitsReady(self):
         return True
