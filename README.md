@@ -30,6 +30,7 @@ For security, only the authors have access to login.
 - Even if a task fails, show an aggregated prediction.
 - Formalize the data at each point: before/after a FIX and before/after a CHECK. Formalize when ellipses get added at the beginning/end of a string, and how punctuation (the dots between words in each task) gets handled. As-is, a small change requires manual update of many moving parts.
 - Unit tests.
+- Fancier audio interface to allow reduced playback speeds.
 
 ## Getting started
 Create a .env file with the following keys:

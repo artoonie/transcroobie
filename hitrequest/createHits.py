@@ -11,6 +11,8 @@ from hitrequest.models import AudioSnippet
 from transcroobie import settings
 from hit.transcriptProcessUtils import transcriptWithSpacesAndEllipses,\
                                        combineConsecutiveDuplicates
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__)
 
 class CompletionStatus(IntEnum):
     incomplete = 0,
@@ -206,7 +208,11 @@ class HitCreator():
     def approveAllHits(self):
         # Approve hits:
         for assignment in self.getAllAssignments():
-            self.connection.approve_assignment(assignment.AssignmentId)
+            try:
+                self.connection.approve_assignment(assignment.AssignmentId)
+            except MTurkRequestError as e:
+                # Maybe already approved?
+                logger.error("MTurk Request Error: " + str(e))
 
     def checkIfHitsReady(self):
         return True
