@@ -2,6 +2,7 @@ from itertools import groupby
 
 def transcriptWithSpacesAndEllipses(transcriptList):
     """ Add a space between each word, and add ellipses before/after """
+    assert transcriptList
     withSpaces = addSpaceToTranscriptList(transcriptList)
     withEllipses = ["..."]
     withEllipses.extend(withSpaces)

@@ -1,3 +1,4 @@
+import json
 import mock
 import os
 import shutil
@@ -9,10 +10,10 @@ from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hitrequest.models import Document
+from hitrequest.models import AudioSnippet, Document
 from transcroobie import settings
 
-testFilepath = 'dRetroist-201-Xanadu_cropped.mp3'
+testFilepath = 'testData/retroist-cropped-again.wav'
 
 class HitRequestTest(TestCase):
     def setUp(self):
@@ -32,6 +33,7 @@ class HitRequestTest(TestCase):
         self.client.login(username='user', password='password')
 
     def uploadAudio(self):
+        assert os.path.exists(testFilepath)
         with file(testFilepath) as fp:
             response = self.client.post(reverse('hitrequest:index'),
                     {'uploadedFile': fp}, follow=True)
@@ -44,7 +46,7 @@ class HitRequestTest(TestCase):
             newFile = SimpleUploadedFile(fp.name, fp.read())
             newDoc = Document(docfile = newFile)
             newDoc.save()
-            expectedRelpath = fp.name
+            expectedRelpath = os.path.basename(fp.name)
             self.assertEqual(newFile.name, expectedRelpath)
         expectedFullpath = os.path.join(settings.MEDIA_ROOT, 'documents', expectedRelpath)
         assert os.path.exists(expectedFullpath)
@@ -64,21 +66,31 @@ class HitRequestTest(TestCase):
         response = self.client.get(reverse('hitrequest:index'))
         self.assertEqual(response.status_code, 302)
 
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-    @mock.patch('hitrequest.views._processUploadedDocument.delay')
-    def test_hit_submission(self, delay):
+    @override_settings(CELERY_ALWAYS_EAGER=True)
+    @mock.patch('googleapiclient.http.HttpRequest.execute')
+    def test_hit_submission(self, mockExecute):
+        def googleSpeechExecute(self):
+            data = json.loads(self.body)
+            expectedStart = 'gs://transcroobie-clips/audioparts'
+            assert data['audio']['uri'].startswith(expectedStart)
+            return {u'results':
+                [{u'alternatives': [{u'confidence': 0.73709655, u'transcript':
+                u"I grew up in the house with two older siblings wonderful "\
+                "people, but when you're the youngest sibling, I maybe this is "\
+                "not a problem today screens are everywhere when you were "\
+                "younger sibling back when you"}]}]}
+        mockExecute.side_effect = googleSpeechExecute
+
         self.login()
         self.uploadAudio()
 
-        self.assertTrue(delay.called)
-
         # GET data
-        audioFile = Document.objects.latest('docfile')
-        docId = audioFile.id
-        self.assertEqual(docId, 1)
         assignmentId = "ASSIGNMENT_ID_NOT_AVAILABLE"
         hitId = "3HEA4ZVWVCLIGVGE95R5FB2KOCC55X"
-        getData = {'assignmentId': assignmentId, 'docId': docId, 'hitId': hitId}
+        audioSnippet = AudioSnippet.objects.latest('audio')
+        getData = {'assignmentId': assignmentId,
+                   'docId': audioSnippet.id,
+                   'hitId': hitId}
 
-        response = self.client.get(reverse('fixHIT'), getData)
+        response = self.client.get(reverse('checkHIT'), getData)
         self.assertEqual(response.status_code, 200)
