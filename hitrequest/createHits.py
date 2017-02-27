@@ -47,7 +47,7 @@ class HitCreator():
             baseurl = 'https://localhost:5000/hit/' + suffix
         else:
             baseurl = "https://transcroobie.herokuapp.com/hit/" + suffix
-        title = "Transcribe the audio as best you can."
+        title = "Transcribe a short audio clip."
         description = "Transcribe the audio. Words may be cut off at the beginning"\
                       " or end of the segment. Do not worry about correctly"\
                       " transcribing these words."
