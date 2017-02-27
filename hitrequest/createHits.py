@@ -36,10 +36,10 @@ class HitCreator():
             suffix = "fixHIT"
             # half cent per incorrect word, up to eight words
             assert isinstance(numIncorrectWords, int)
-            amount = max(min(.04, numIncorrectWords*.005), .01)
+            amount = max(min(.05, numIncorrectWords*.005), .02)
         elif hitType == "check":
             suffix = "checkHIT"
-            amount = 0.02
+            amount = 0.05
         else:
             assert False
 
