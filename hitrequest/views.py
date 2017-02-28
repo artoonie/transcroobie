@@ -1,5 +1,6 @@
 import os
 from urlparse import urlparse
+import tempfile
 
 from boto.exception import GSResponseError
 from celery.utils.log import get_task_logger
@@ -66,7 +67,7 @@ def _list(request):
 @app.task(name="_processUploadedDocument")
 def _processUploadedDocument(docId, extension):
     # Extension should include leading '.'
-    import tempfile
+    ONLY_USE_GOOGLE = True
 
     newdoc = get_object_or_404(Document, pk = docId)
     logger.info("Processing document: " + newdoc.docfile.url)
@@ -101,12 +102,14 @@ def _processUploadedDocument(docId, extension):
             url = "gs://"+settings.GS_BUCKET_NAME+urlparse(audioModel.audio.url).path
             text, confidence = getTranscriptionFromURL(url, sampleRate)
             audioModel.predictions.append(text)
-            if float(confidence) > .99:
+            if float(confidence) > .90:
                 audioModel.hasBeenValidated = True
-
-            # Create a hit from this document
-            hitCreator.createHitFrom(audioModel, 'check')
-            newdoc.audioSnippets.add(audioModel) # this saves audioModel
+            if ONLY_USE_GOOGLE:
+                audioModel.isComplete = True
+            else:
+                # Create a hit from this document
+                hitCreator.createHitFrom(audioModel, 'check')
+                newdoc.audioSnippets.add(audioModel) # this saves audioModel
         logger.info("   Completed part  {}".format(i))
         i += 1
 

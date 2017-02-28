@@ -161,7 +161,7 @@ class HitCreator():
     def getCompletionStatus(self, audioSnippet, response):
         # only callwhen all hitTypes == "check"
         # returns a CompletionStatus
-        MAX_NUM_PREDICTIONS = 0 # TODO test what if we just did google?
+        MAX_NUM_PREDICTIONS = 2
 
         completionStatus = CompletionStatus.incomplete
         if all(response):

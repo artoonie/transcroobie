@@ -69,6 +69,7 @@ class HitRequestTest(TestCase):
     @override_settings(CELERY_ALWAYS_EAGER=True)
     @mock.patch('googleapiclient.http.HttpRequest.execute')
     def test_hit_submission(self, mockExecute):
+        """ This is the primary integration test: a roundtrip check/fix """
         def googleSpeechExecute(self):
             data = json.loads(self.body)
             expectedStart = 'gs://transcroobie-clips/audioparts'
@@ -94,3 +95,6 @@ class HitRequestTest(TestCase):
 
         response = self.client.get(reverse('checkHIT'), getData)
         self.assertEqual(response.status_code, 200)
+
+        # POST data
+        response = self.client.get(reverse('checkHIT'), getData)
