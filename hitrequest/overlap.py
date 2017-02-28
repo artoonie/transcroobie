@@ -124,7 +124,7 @@ def combineSeveral(listOfStrings):
             # Truncate the second string, removing the beginning
             listOfStrings[i+1] = listOfStrings[i+1][index+1:]
 
-    return ''.join(listOfStrings)
+    return '\n'.join(listOfStrings)
 
 if __name__ == "__main__":
     a = "is not a problem today, screens are everywhere, but when you were a START younger sibling back when you FIX FIX"
