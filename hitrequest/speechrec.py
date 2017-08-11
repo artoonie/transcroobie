@@ -3,12 +3,12 @@ from oauth2client.client import GoogleCredentials
 
 def getTranscriptionFromURL(url, sampleRate):
     credentials = GoogleCredentials.get_application_default()
-    service = build('speech', 'v1beta1', credentials=credentials)
+    service = build('speech', 'v1', credentials=credentials)
 
     data = {
       "config": {
           "encoding":"LINEAR16",
-          "sampleRate": sampleRate,
+          "sampleRateHertz": sampleRate,
           "languageCode": "en-US"
       },
       "audio": {
