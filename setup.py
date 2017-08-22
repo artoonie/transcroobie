@@ -47,5 +47,5 @@ setup(
                       'kombu==3.0.32',
                       'redis==2.10.5',
                       'python-social-auth==0.2.1',
-                      'google-api-python-client']
+                      'google-api-python-client==1.6.2']
 )

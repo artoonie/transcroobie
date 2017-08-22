@@ -4,6 +4,8 @@ import tempfile
 
 from pydub import AudioSegment
 
+class AudioError(ValueError): pass
+
 def basenameNoExt(filename):
     """ e.g. /foo/bar/baz.txt returns baz """
     return os.path.splitext(os.path.basename(filename))[0]
@@ -37,3 +39,15 @@ def splitAudioIntoParts(uploadedFilepath, extension, basedir):
                 dir = basedir) as currFilename:
             curr_track.export(currFilename.name, format="wav", bitrate="192k")
             yield (currFilename.name, sampleRate)
+
+def validateAudio(uploadedFilepath, extension):
+    """ Ensures that the audio is ready for processing, which currently means:
+        1. Only a single channel
+            - required by Google Speech API
+    """
+    track = AudioSegment.from_file(uploadedFilepath, extension[1:])
+    if track.channels != 1:
+        raise AudioError("Google Speech API requires single-channel audio, "\
+               "but you have %d channels in your audio." % (track.channels,))
+
+    return None

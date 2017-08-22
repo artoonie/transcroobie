@@ -181,7 +181,13 @@ class HitCreator():
         for audioSnippet in audioSnippets:
             hitID = audioSnippet.activeHITId
             if not hitID: continue
-            hit = self.connection.get_hit(hitID)
+
+            try:
+                hit = self.connection.get_hit(hitID)
+            except MTurkRequestError as e:
+                logger.error("Perhaps this HIT no longer exists: " + str(e))
+                continue
+
             asgnForHit = self.connection.get_assignments(hit[0].HITId)
             if asgnForHit:
                 # Hit is ready. Get the data.
@@ -191,10 +197,15 @@ class HitCreator():
                     self.processHit(questionFormAnswers)
                     newHITCompleted = True
 
-        responses = [a.predictions[-1] for a in audioSnippets]
         statuses = [a.isComplete for a in audioSnippets]
         if all([a.hasBeenValidated for s in statuses]) or \
                 all([a.isComplete for a in audioSnippets]):
+            # Note: if the conditional is not met, predictions may be an empty
+            # array. Don't run this next line outside of this conditional.
+            # (Happens only in a race condition after the audioSnippet is
+            # uploaded, and before it adds its first prediction.)
+            responses = [a.predictions[-1] for a in audioSnippets]
+
             # All tasks complete for first time
             totalString = overlap.combineSeveral(responses)
             doc.completeTranscript = totalString

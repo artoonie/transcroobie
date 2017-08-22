@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from hitrequest.models import Document, AudioSnippet
 from hitrequest.forms import DocumentForm
-from hitrequest.splitAudio import splitAudioIntoParts
+from hitrequest.splitAudio import splitAudioIntoParts, validateAudio, AudioError
 from hitrequest.createHits import HitCreator
 from hitrequest.speechrec import getTranscriptionFromURL
 from transcroobie.celery import app
@@ -43,6 +43,12 @@ def _list(request):
             usersFilename = uploadedFile.name
             _, extension = os.path.splitext(usersFilename)
 
+            # Validate the audio immediately
+            try:
+                _validateUploadedDocument(newdoc.id, extension, usersFilename)
+            except AudioError as e:
+                return HttpResponse("Invalid Audio: " + str(e))
+
             # Delay processing so we can return a file soon
             _processUploadedDocument.delay(newdoc.id, extension)
 
@@ -55,7 +61,7 @@ def _list(request):
         form = DocumentForm() # A empty, unbound form
 
     # Load documents for the list page
-    documents = Document.objects.all()
+    documents = Document.objects.order_by('id').all()
 
     render_data = {'documents': documents,
                    'form': form}
@@ -64,19 +70,38 @@ def _list(request):
 
     return HttpResponse(response)
 
-@app.task(name="_processUploadedDocument")
-def _processUploadedDocument(docId, extension):
-    # Extension should include leading '.'
-    ONLY_USE_GOOGLE = True
-
+def _getUploadedFile(docId, extension):
+    """
+        Grabs an uploaded file and returns a tempFile with its contents,
+        as well as a pointer to the Model
+    """
     newdoc = get_object_or_404(Document, pk = docId)
-    logger.info("Processing document: " + newdoc.docfile.url)
-
 
     tmpFile = tempfile.NamedTemporaryFile(suffix=extension)
     uploadedFile = newdoc.docfile
     with open(tmpFile.name, 'wb+') as dest:
         dest.write(uploadedFile.read())
+
+    return newdoc, tmpFile
+
+def _validateUploadedDocument(docId, extension, usersFilename):
+    """
+        Verifies that the uploaded document is ready for processing
+    """
+    newdoc, tmpFile = _getUploadedFile(docId, extension)
+    logger.info("Verifying Doc ID %d (%s)" % (docId, usersFilename))
+
+    validateAudio(tmpFile.name, extension)
+
+    logger.info("Doc ID %d (%s) is valid" % (docId, usersFilename))
+
+@app.task(name="_processUploadedDocument")
+def _processUploadedDocument(docId, extension):
+    # Extension should include leading '.'
+    ONLY_USE_GOOGLE = True
+
+    newdoc, tmpFile = _getUploadedFile(docId, extension)
+    logger.info("Processing Doc ID %d" % (docId,))
 
     hitCreator = HitCreator()
 
@@ -102,14 +127,19 @@ def _processUploadedDocument(docId, extension):
             url = "gs://"+settings.GS_BUCKET_NAME+urlparse(audioModel.audio.url).path
             text, confidence = getTranscriptionFromURL(url, sampleRate)
             audioModel.predictions.append(text)
+
             if float(confidence) > .90:
                 audioModel.hasBeenValidated = True
+
             if ONLY_USE_GOOGLE:
                 audioModel.isComplete = True
             else:
                 # Create a hit from this document
                 hitCreator.createHitFrom(audioModel, 'check')
-                newdoc.audioSnippets.add(audioModel) # this saves audioModel
+
+            newdoc.audioSnippets.add(audioModel) # this sometimes saves audioModel?
+            audioModel.save() # but sometimes it doesn't and we need to manually save?
+
         logger.info("   Completed part  {}".format(i))
         i += 1
 

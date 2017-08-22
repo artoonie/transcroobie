@@ -1,5 +1,8 @@
+from celery.utils.log import get_task_logger
 from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
+
+logger = get_task_logger(__name__)
 
 def getTranscriptionFromURL(url, sampleRate):
     credentials = GoogleCredentials.get_application_default()
@@ -16,8 +19,12 @@ def getTranscriptionFromURL(url, sampleRate):
       }
     }
 
-    request = service.speech().syncrecognize(body=data)
-    response = request.execute()
+    request = service.speech().recognize(body=data)
+    try:
+        response = request.execute()
+    except Exception as e:
+        logger.error(str(e))
+        raise e
 
     transcript = ""
     confidence = 0
