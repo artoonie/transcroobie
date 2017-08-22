@@ -33,6 +33,7 @@ For security, only the authors have access to login.
   - End-to-end integration test
   - Ensure a multi-channel file upload produces an error
 - Fancier audio interface to allow reduced playback speeds.
+- Split audio based on silence (perhaps using software called mp3splt- thanks to Roy J for the suggestion)
 
 ## Getting started
 Create a .env file with the following keys:
