@@ -57,6 +57,7 @@ export REDIS_URL=""
 
 export SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=""
 export SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=""
+export GOOGLE_APPLICATION_CREDENTIALS="<filename>.json"
 ```
 (and create all relevant accounts)
 
