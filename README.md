@@ -34,6 +34,7 @@ For security, only the authors have access to login.
   - Ensure a multi-channel file upload produces an error
 - Fancier audio interface to allow reduced playback speeds.
 - Split audio based on silence (perhaps using software called mp3splt- thanks to Roy J for the suggestion)
+- Create a User model which stores account information, including AWS/Google keys, so that they're not stored in environment variables. (thanks to Roy J for the suggestion)
 
 ## Getting started
 Create a .env file with the following keys:
