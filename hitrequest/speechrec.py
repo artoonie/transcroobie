@@ -34,6 +34,12 @@ def getTranscriptionFromURL(url, sampleRate):
         if results['alternatives']:
             result = results['alternatives'][0]
             transcript = result['transcript']
-            confidence = result['confidence']
+            try:
+                confidence = result['confidence']
+            except KeyError:
+                # From the Google Speech API Documentation:
+                # Your code should not require the confidence field as it is not
+                # guaranteed to be accurate, or even set, in any of the results.
+                confidence = 0.0
 
     return transcript, confidence
